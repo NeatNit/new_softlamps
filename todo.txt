@@ -1,0 +1,5 @@
+Types of HeavyLight modules:
+
+1. Multipliers - modules that change something in the world before each render. Example: soft lamps.
+2. View multiplier - modules that modify the render view before each render. Example: Super DOF.
+3. Renderer multiplier - modules that render the scene in a nonstandard way. Example: godrays.
