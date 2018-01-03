@@ -1,3 +1,12 @@
+local _G = _G
+module("heavylight")
+
+local renderer_meta = {}
+
+function NewRenderer()
+	return setmetatable({}, renderer_meta)
+end
+
 local tex_scrfx = render.GetScreenEffectTexture()
 local tex_blend = GetRenderTarget("HeavyLightYay", ScrW(), ScrH(), false)
 local mat_copy = Material("pp/copy")
