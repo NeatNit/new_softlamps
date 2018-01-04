@@ -79,15 +79,6 @@ local HeavyLightRenderer = setmetatable({}, HeavyLightModule)
 HeavyLightRenderer.__index = HeavyLightRenderer
 debug.getregistry().HeavyLightRenderer = HeavyLightRenderer
 
---[[-------------------------------------------------------------------------
-Render (hook) - called when stuff needs to be rendered.
-param: view - ViewData structure
-	http://wiki.garrysmod.com/page/Structures/ViewData
----------------------------------------------------------------------------]]
---[[ example:
-function HeavyLightRenderer:New(view)
-	render.RenderView(view)
-end ]]
 
 
 
