@@ -1,11 +1,71 @@
-local _G = _G
-module("heavylight")
+-- move these to under the metatables
+-- local _G = _G
+-- module("heavylight")
 
-local renderer_meta = {}
+--[[-------------------------------------------------------------------------
+HeavyLightModule
+================
+Base class - all modules derive from this
+---------------------------------------------------------------------------]]
+local HeavyLightModule = {}
+HeavyLightModule.__index = HeavyLightModule
+debug.getregistry().HeavyLightModule = HeavyLightModule
 
-function NewRenderer()
-	return setmetatable({}, renderer_meta)
+--[[-------------------------------------------------------------------------
+Set/GetParent - sets/gets a parent entity (or other object) so the module gets
+automatically removed when it's found to be invalid. This is optional.
+---------------------------------------------------------------------------]]
+local parent = {} -- private key
+function HeavyLightModule:SetParent(p)
+	if not p.IsValid then error("Attempt to set a parent without an IsValid fuction!") end
+	self[parent] = p
 end
+function HeavyLightModule:GetParent()
+	return self[parent]
+end
+
+--[[-------------------------------------------------------------------------
+Set/GetPassesCount - sets/gets the number of iterations this module
+expects to make. This is not binding.
+---------------------------------------------------------------------------]]
+local passes = {} -- private key
+HeavyLightModule[passes] = 1 -- defaults
+function HeavyLightModule:SetPassesCount(p)
+	self[passes] = p
+end
+function HeavyLightModule:GetPassesCount()
+	return self[passes]
+end
+
+
+
+
+--[[-------------------------------------------------------------------------
+HeavyLightRenderer
+==================
+Renderer module class. For now, this doesn't really have any functions, just
+hoooks.
+---------------------------------------------------------------------------]]
+local HeavyLightRenderer = setmetatable({}, HeavyLightModule)
+HeavyLightRenderer.__index = HeavyLightRenderer
+debug.getregistry().HeavyLightRenderer = HeavyLightRenderer
+
+
+
+
+--[[-------------------------------------------------------------------------
+HeavyLightBlender
+==================
+Renderer module class. For now, this doesn't really have any functions, just
+hoooks.
+---------------------------------------------------------------------------]]
+local HeavyLightBlender = setmetatable({}, HeavyLightModule)
+HeavyLightBlender.__index = HeavyLightBlender
+debug.getregistry().HeavyLightBlender = HeavyLightBlender
+
+
+
+
 
 local tex_scrfx = render.GetScreenEffectTexture()
 local tex_blend = GetRenderTarget("HeavyLightYay", ScrW(), ScrH(), false)
