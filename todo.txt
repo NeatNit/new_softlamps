@@ -7,8 +7,8 @@ Types of HeavyLight modules:
 HeavyLightModule - base metatable that all others inherit from:
 SetParent: add an object when an IsValid method that, when it becomes invalid, means the module should be removed. This is optional. Set to nil to unset.
 GetParent: gets the previously set parent, or nil if there is none.
-SetLength: (might have to rename this) sets how many iterations I expect to make. This is not binding, it's only an estimate, and it can be updated whenever.
-GetLength: gets the previously set length. 1 by default.
+SetPassesCount: sets how many iterations I expect to make. This is not binding, it's only an estimate, and it can be updated whenever.
+GetPassesCount: gets the previously set length. 1 by default.
 Start (hook): basically says "get out of the way and/or prep to be called", will be called for ALL modules regardless if they are active (in the stack) or not, with probably a parameter to indicate whether they are.
 Finish (hook): HeavyLight is done, return to gameplay.
 IsActive: gets whether the module is selected.
@@ -26,3 +26,4 @@ Preview (hook):
 
 HeavyLightStackObject - modifies something in the world or the view when called:
 Tick (hook): make your change for the next iteration. Return true to confirm, or false to signal that you are all done.
+GetStackIndex: this module's position in the stack, or nil if it's not in the stack

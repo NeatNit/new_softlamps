@@ -1,6 +1,4 @@
--- move these to under the metatables
--- local _G = _G
--- module("heavylight")
+local DoNothing = function() end -- used a bunch of times
 
 --[[-------------------------------------------------------------------------
 HeavyLightModule
@@ -13,7 +11,7 @@ debug.getregistry().HeavyLightModule = HeavyLightModule
 
 --[[-------------------------------------------------------------------------
 Set/GetParent - sets/gets a parent entity (or other object) so the module gets
-automatically removed when it's found to be invalid. This is optional.
+	automatically removed when it's found to be invalid. This is optional.
 ---------------------------------------------------------------------------]]
 local parent = {} -- private key
 function HeavyLightModule:SetParent(p)
@@ -26,7 +24,7 @@ end
 
 --[[-------------------------------------------------------------------------
 Set/GetPassesCount - sets/gets the number of iterations this module
-expects to make. This is not binding.
+	expects to make. This is not binding.
 ---------------------------------------------------------------------------]]
 local passes = {} -- private key
 HeavyLightModule[passes] = 1 -- defaults
@@ -37,6 +35,37 @@ function HeavyLightModule:GetPassesCount()
 	return self[passes]
 end
 
+--[[-------------------------------------------------------------------------
+Start (hook) - 'Get out of the way'. Called for ALL existing modules when
+	rendering starts.
+param: HeavyLightStackStructure
+---------------------------------------------------------------------------]]
+HeavyLightModule.Start = DoNothing -- by default
+
+--[[-------------------------------------------------------------------------
+New (hook) - notification that this is a new scene (view changed or something
+	in the world changed).
+param: HeavyLightStackStructure
+---------------------------------------------------------------------------]]
+HeavyLightModule.New = DoNothing -- by default
+--[[ examples:
+
+-- a renderer module might need to clear the screen before ticking:
+function some_rendering_module:New(stack)
+	render.Clear(0, 0, 0, 255)
+end
+
+-- a stack module might reset some internal variables or prep stuff:
+function some_stack_module:New(stack)
+	self:GetParent():PrepareForHeavyLightTick()
+end
+]]
+
+--[[-------------------------------------------------------------------------
+Finish (hook) - HeavyLight finished completely.
+param: HeavyLightStackStructure
+---------------------------------------------------------------------------]]
+HeavyLightModule.Finish = DoNothing -- by default
 
 
 
@@ -49,6 +78,16 @@ hoooks.
 local HeavyLightRenderer = setmetatable({}, HeavyLightModule)
 HeavyLightRenderer.__index = HeavyLightRenderer
 debug.getregistry().HeavyLightRenderer = HeavyLightRenderer
+
+--[[-------------------------------------------------------------------------
+Render (hook) - called when stuff needs to be rendered.
+param: view - ViewData structure
+	http://wiki.garrysmod.com/page/Structures/ViewData
+---------------------------------------------------------------------------]]
+--[[ example:
+function HeavyLightRenderer:New(view)
+	render.RenderView(view)
+end ]]
 
 
 
@@ -66,10 +105,6 @@ debug.getregistry().HeavyLightBlender = HeavyLightBlender
 
 
 
-
-local tex_scrfx = render.GetScreenEffectTexture()
-local tex_blend = GetRenderTarget("HeavyLightYay", ScrW(), ScrH(), false)
-local mat_copy = Material("pp/copy")
 
 local function DoHeavyLightRender()
 	local a = true
