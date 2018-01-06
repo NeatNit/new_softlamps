@@ -7,23 +7,24 @@ Types of HeavyLight modules:
 HeavyLightBase - base metatable that all others inherit from:
 SetParent: add an object when an IsValid method that, when it becomes invalid, means the module should be removed. This is optional. Set to nil to unset.
 GetParent: gets the previously set parent, or nil if there is none.
-SetPassesCount: sets how many iterations I expect to make. This is not binding, it's only an estimate, and it can be updated whenever.
-GetPassesCount: gets the previously set length. 1 by default.
 Start (hook): basically says "get out of the way and/or prep to be called", will be called for ALL modules regardless if they are active (in the stack) or not, with probably a parameter to indicate whether they are.
 Finish (hook): HeavyLight is done, return to gameplay.
-IsActive: gets whether the module is selected.
+IsActive: gets whether the module is selected. Implemented per
 TODO: settings, panels, etc
-
-
-HeavyLightRenderer - module that renders the scene to the active render target:
-New (hook): this is a new scene, if you need to clean it up in some way, do it now.
-Render (hook): render the scene. *Should* have a guarantee that the render target remains unmodified and is always the same one between calls. Return true when done, or false to signal that you were done.
 
 HeavyLightBlender - handles the render target mess:
 TO DO (this will be tricky to define)
 Finalize (hook): we are all done, put the actual result on the screen to be saved.
 Preview (hook):
 
+HeavyLightIterativeBase - middle class for renderers and modules
+SetPassesCount: sets how many iterations I expect to make. This is not binding, it's only an estimate, and it can be updated whenever.
+GetPassesCount: gets the previously set length. 1 by default.
+
+HeavyLightRenderer - module that renders the scene to the active render target:
+New (hook): this is a new scene, if you need to clean it up in some way, do it now.
+Render (hook): render the scene. *Should* have a guarantee that the render target remains unmodified and is always the same one between calls. Return true when done, or false to signal that you were done.
+
 HeavyLightModule - modifies something in the world or the view when called:
 Tick (hook): make your change for the next iteration. Return true to confirm, or false to signal that you are all done.
-GetStackIndex: this module's position in the stack, or nil if it's not in the stack
+GetIndex: this module's position in the stack, or nil if it's not in the stack

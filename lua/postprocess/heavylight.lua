@@ -10,29 +10,20 @@ HeavyLightBase.__index = HeavyLightBase
 debug.getregistry().HeavyLightBase = HeavyLightBase
 
 --[[-------------------------------------------------------------------------
+Set/GetName - friendly name / title
+---------------------------------------------------------------------------]]
+AccessorFunc(HeavyLightBase, "_name", Name, FORCE_STRING)
+
+--[[-------------------------------------------------------------------------
 Set/GetParent - sets/gets a parent entity (or other object) so the module gets
 	automatically removed when it's found to be invalid. This is optional.
 ---------------------------------------------------------------------------]]
-local parent = {} -- private key
 function HeavyLightBase:SetParent(p)
 	if not p.IsValid then error("Attempt to set a parent without an IsValid fuction!") end
-	self[parent] = p
+	self._parent = p
 end
 function HeavyLightBase:GetParent()
-	return self[parent]
-end
-
---[[-------------------------------------------------------------------------
-Set/GetPassesCount - sets/gets the number of iterations this module
-	expects to make. This is not binding.
----------------------------------------------------------------------------]]
-local passes = {} -- private key
-HeavyLightBase[passes] = 1 -- defaults
-function HeavyLightBase:SetPassesCount(p)
-	self[passes] = p
-end
-function HeavyLightBase:GetPassesCount()
-	return self[passes]
+	return self._parent
 end
 
 --[[-------------------------------------------------------------------------
@@ -50,16 +41,17 @@ param: HeavyLightStackStructure
 HeavyLightBase.New = DoNothing -- by default
 --[[ examples:
 
--- a renderer module might need to clear the screen before ticking:
-function some_rendering_module:New(stack)
+-- a renderer might need to clear the screen before ticking:
+function some_renderer:New(stack)
 	render.Clear(0, 0, 0, 255)
 end
 
--- a stack module might reset some internal variables or prep stuff:
-function some_stack_module:New(stack)
+-- a module might reset some internal variables or prep stuff:
+function some_module:New(stack)
 	self:GetParent():PrepareForHeavyLightTick()
 end
 ]]
+
 
 --[[-------------------------------------------------------------------------
 Finish (hook) - HeavyLight finished completely.
@@ -69,31 +61,83 @@ HeavyLightBase.Finish = DoNothing -- by default
 
 
 
---[[-------------------------------------------------------------------------
-HeavyLightRenderer
-==================
-Renderer module class. For now, this doesn't really have any functions, just
-hoooks.
----------------------------------------------------------------------------]]
-local HeavyLightRenderer = setmetatable({}, HeavyLightBase)
-HeavyLightRenderer.__index = HeavyLightRenderer
-debug.getregistry().HeavyLightRenderer = HeavyLightRenderer
-
-
-
 
 
 --[[-------------------------------------------------------------------------
 HeavyLightBlender
 ==================
-Renderer module class. For now, this doesn't really have any functions, just
-hoooks.
+Blender class. For now, this doesn't really have any functions, just
+hooks.
 ---------------------------------------------------------------------------]]
 local HeavyLightBlender = setmetatable({}, HeavyLightBase)
 HeavyLightBlender.__index = HeavyLightBlender
 debug.getregistry().HeavyLightBlender = HeavyLightBlender
 
 
+
+
+
+
+
+--[[-------------------------------------------------------------------------
+HeavyLightIterativeBase
+=======================
+Adds the iterative functionality of both modules and
+---------------------------------------------------------------------------]]
+local HeavyLightIterativeBase = setmetatable({}, HeavyLightBase)
+HeavyLightIterativeBase.__index = HeavyLightIterativeBase
+debug.getregistry().HeavyLightIterativeBase = HeavyLightIterativeBase
+
+--[[-------------------------------------------------------------------------
+Set/GetPassesCount - sets/gets the number of iterations this module
+	expects to make. This is not binding.
+---------------------------------------------------------------------------]]
+AccessorFunc(HeavyLightBase, "_passes", "PassesCount", FORCE_NUMBER)
+HeavyLightBase:SetPassesCount(1) -- default
+
+
+
+
+
+--[[-------------------------------------------------------------------------
+HeavyLightRenderer
+==================
+Renderer module class. The simplest one just uses render.RenderView, another
+	one can render just a single entity or a group or entities, or do
+	something entirely different altogether.
+	For now, this doesn't really have any functions, just hoooks.
+---------------------------------------------------------------------------]]
+local HeavyLightRenderer = setmetatable({}, HeavyLightIterativeBase)
+HeavyLightRenderer.__index = HeavyLightRenderer
+debug.getregistry().HeavyLightRenderer = HeavyLightRenderer
+
+function HeavyLightRenderer:IsActive()
+	error("to do")
+end
+
+--[[-------------------------------------------------------------------------
+Tick is an alias of Render. HeavyLight will call Render but if the addon
+	chose to implement the Tick hook instead this will make sure it gets
+	called.
+---------------------------------------------------------------------------]]
+function HeavyLightRenderer:Render(...)
+	return self:Tick(...)
+end
+
+
+
+
+
+
+--[[-------------------------------------------------------------------------
+HeavyLightModule
+================
+Module that can be part of the stack, like Soft Lamps or SuperDOF. They can
+	change something in the world or
+---------------------------------------------------------------------------]]
+local HeavyLightModule = setmetatable({}, HeavyLightIterativeBase)
+HeavyLightModule.__index = HeavyLightModule
+debug.getregistry().HeavyLightModule = HeavyLightModule
 
 
 
