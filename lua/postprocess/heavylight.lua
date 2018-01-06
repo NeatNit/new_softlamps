@@ -1,24 +1,24 @@
 local DoNothing = function() end -- used a bunch of times
 
 --[[-------------------------------------------------------------------------
-HeavyLightModule
+HeavyLightBase
 ================
 Base class - all modules derive from this
 ---------------------------------------------------------------------------]]
-local HeavyLightModule = {}
-HeavyLightModule.__index = HeavyLightModule
-debug.getregistry().HeavyLightModule = HeavyLightModule
+local HeavyLightBase = {}
+HeavyLightBase.__index = HeavyLightBase
+debug.getregistry().HeavyLightBase = HeavyLightBase
 
 --[[-------------------------------------------------------------------------
 Set/GetParent - sets/gets a parent entity (or other object) so the module gets
 	automatically removed when it's found to be invalid. This is optional.
 ---------------------------------------------------------------------------]]
 local parent = {} -- private key
-function HeavyLightModule:SetParent(p)
+function HeavyLightBase:SetParent(p)
 	if not p.IsValid then error("Attempt to set a parent without an IsValid fuction!") end
 	self[parent] = p
 end
-function HeavyLightModule:GetParent()
+function HeavyLightBase:GetParent()
 	return self[parent]
 end
 
@@ -27,11 +27,11 @@ Set/GetPassesCount - sets/gets the number of iterations this module
 	expects to make. This is not binding.
 ---------------------------------------------------------------------------]]
 local passes = {} -- private key
-HeavyLightModule[passes] = 1 -- defaults
-function HeavyLightModule:SetPassesCount(p)
+HeavyLightBase[passes] = 1 -- defaults
+function HeavyLightBase:SetPassesCount(p)
 	self[passes] = p
 end
-function HeavyLightModule:GetPassesCount()
+function HeavyLightBase:GetPassesCount()
 	return self[passes]
 end
 
@@ -40,14 +40,14 @@ Start (hook) - 'Get out of the way'. Called for ALL existing modules when
 	rendering starts.
 param: HeavyLightStackStructure
 ---------------------------------------------------------------------------]]
-HeavyLightModule.Start = DoNothing -- by default
+HeavyLightBase.Start = DoNothing -- by default
 
 --[[-------------------------------------------------------------------------
 New (hook) - notification that this is a new scene (view changed or something
 	in the world changed).
 param: HeavyLightStackStructure
 ---------------------------------------------------------------------------]]
-HeavyLightModule.New = DoNothing -- by default
+HeavyLightBase.New = DoNothing -- by default
 --[[ examples:
 
 -- a renderer module might need to clear the screen before ticking:
@@ -65,7 +65,7 @@ end
 Finish (hook) - HeavyLight finished completely.
 param: HeavyLightStackStructure
 ---------------------------------------------------------------------------]]
-HeavyLightModule.Finish = DoNothing -- by default
+HeavyLightBase.Finish = DoNothing -- by default
 
 
 
@@ -75,7 +75,7 @@ HeavyLightRenderer
 Renderer module class. For now, this doesn't really have any functions, just
 hoooks.
 ---------------------------------------------------------------------------]]
-local HeavyLightRenderer = setmetatable({}, HeavyLightModule)
+local HeavyLightRenderer = setmetatable({}, HeavyLightBase)
 HeavyLightRenderer.__index = HeavyLightRenderer
 debug.getregistry().HeavyLightRenderer = HeavyLightRenderer
 
@@ -89,7 +89,7 @@ HeavyLightBlender
 Renderer module class. For now, this doesn't really have any functions, just
 hoooks.
 ---------------------------------------------------------------------------]]
-local HeavyLightBlender = setmetatable({}, HeavyLightModule)
+local HeavyLightBlender = setmetatable({}, HeavyLightBase)
 HeavyLightBlender.__index = HeavyLightBlender
 debug.getregistry().HeavyLightBlender = HeavyLightBlender
 

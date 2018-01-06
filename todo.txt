@@ -4,7 +4,7 @@ Types of HeavyLight modules:
 2. Blender - sets the render target, calls the renderer and takes care of blending the results. Examples: Default (with anti-aliasing), Floating-Point Texture (with better HDR), or each of the above with additive blending.
 3. Renderer/Render Multiplier - modules that render the scene, possibly in a nonstandard way. Examples: soft lamps godrays, good old RenderView.
 
-HeavyLightModule - base metatable that all others inherit from:
+HeavyLightBase - base metatable that all others inherit from:
 SetParent: add an object when an IsValid method that, when it becomes invalid, means the module should be removed. This is optional. Set to nil to unset.
 GetParent: gets the previously set parent, or nil if there is none.
 SetPassesCount: sets how many iterations I expect to make. This is not binding, it's only an estimate, and it can be updated whenever.
@@ -24,6 +24,6 @@ TO DO (this will be tricky to define)
 Finalize (hook): we are all done, put the actual result on the screen to be saved.
 Preview (hook):
 
-HeavyLightStackObject - modifies something in the world or the view when called:
+HeavyLightModule - modifies something in the world or the view when called:
 Tick (hook): make your change for the next iteration. Return true to confirm, or false to signal that you are all done.
 GetStackIndex: this module's position in the stack, or nil if it's not in the stack
