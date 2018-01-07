@@ -1,3 +1,12 @@
+--[[-------------------------------------------------------------------------
+Blenders, Modules and Renderers repositories. These should basically just be
+lists, but for easier adding and removing, they will be [module] = module
+---------------------------------------------------------------------------]]
+local Modules = {}
+local Blenders = {}
+local Renderers = {}
+
+
 local DoNothing = function() end -- used a bunch of times
 
 --[[-------------------------------------------------------------------------
@@ -115,14 +124,6 @@ function HeavyLightRenderer:IsActive()
 	error("to do")
 end
 
---[[-------------------------------------------------------------------------
-Tick is an alias of Render. HeavyLight will call Render but if the addon
-	chose to implement the Tick hook instead this will make sure it gets
-	called.
----------------------------------------------------------------------------]]
-function HeavyLightRenderer:Render(...)
-	return self:Tick(...)
-end
 
 
 
@@ -139,6 +140,34 @@ local HeavyLightModule = setmetatable({}, HeavyLightIterativeBase)
 HeavyLightModule.__index = HeavyLightModule
 debug.getregistry().HeavyLightModule = HeavyLightModule
 
+
+
+
+
+
+--[[-------------------------------------------------------------------------
+The HeavyLight Library
+---------------------------------------------------------------------------]]
+local _G = _G
+module("heavylight")
+
+function NewModule()
+	local m = setmetatable({}, HeavyLightModule)
+	Modules[m] = m
+	return m
+end
+
+function NewBlender()
+	local b = setmetatable({}, HeavyLightBlender)
+	Blenders[b] = b
+	return b
+end
+
+function NewRenderer()
+	local r = setmetatable({}, HeavyLightRenderer)
+	Renderers[r] = r
+	return r
+end
 
 
 local function DoHeavyLightRender()
@@ -176,6 +205,7 @@ local function DoHeavyLightRender()
 end
 
 
+
 --[[-------------------------------------------------------------------------
 GUI
 ---------------------------------------------------------------------------]]
@@ -188,33 +218,33 @@ function PANEL:Init()
 	self:SetTitle("HeavyLight")
 	self:SetSize( 600, 220)
 
-	self.ActionButtonsPanel = vgui.Create("DPanel", self)
+	self.ActionButtonsPanel = _G.vgui.Create("DPanel", self)
 
-	self.StartButton = vgui.Create("DButton", self.ActionButtonsPanel)
+	self.StartButton = _G.vgui.Create("DButton", self.ActionButtonsPanel)
 	self.StartButton:SetText("Test Button")
 	self.StartButton.DoClick = DoHeavyLightRender
 
 	self.ActionButtonsPanel:Dock(FILL)
 end
 
-PANEL = vgui.RegisterTable(PANEL, "DFrame")
+PANEL = _G.vgui.RegisterTable(PANEL, "DFrame")
 
-concommand.Add("hl_openwindow", function()
-	if IsValid(HeavyLightWindow) then
-		print "Deleting old window"
+_G.concommand.Add("hl_openwindow", function()
+	if _G.IsValid(HeavyLightWindow) then
+		_G.print "Deleting old window"
 		HeavyLightWindow:Remove()
 	end
 
-	print "Creating new window"
-	HeavyLightWindow = vgui.CreateFromTable(PANEL)
+	_G.print "Creating new window"
+	HeavyLightWindow = _G.vgui.CreateFromTable(PANEL)
 
 	HeavyLightWindow:AlignBottom(50)
 	HeavyLightWindow:CenterHorizontal()
 	HeavyLightWindow:MakePopup()
 end)
 
-list.Set("PostProcess", "HeavyLight", {
+_G.list.Set("PostProcess", "HeavyLight", {
 	icon = "gui/postprocess/superdof.png",
 	category = "#effects_pp",
-	onclick = function() RunConsoleCommand("hl_openwindow") end
+	onclick = function() _G.RunConsoleCommand("hl_openwindow") end
 })
