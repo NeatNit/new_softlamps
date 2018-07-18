@@ -210,6 +210,7 @@ end
 GUI
 ---------------------------------------------------------------------------]]
 
+--[[ OLD (copied from SuperDOF):
 local PANEL = {}
 
 local HeavyLightWindow = nil
@@ -248,3 +249,45 @@ _G.list.Set("PostProcess", "HeavyLight", {
 	category = "#effects_pp",
 	onclick = function() _G.RunConsoleCommand("hl_openwindow") end
 })
+]]
+
+-- New, and atm just proof of concept:
+local mainui
+local function GetMainUI()
+	if mainui then return mainui end
+
+	print "creating mainui"
+
+	mainui = vgui.Create("DLabel")
+	mainui:SetText("Hello,\nHeavyLight\nWorld!")
+	mainui:SetColor(Color(255, 0, 0))
+	mainui:SizeToContents()
+
+	return mainui
+end
+
+
+
+-- Create tool tab and categories
+-- (these could be together in one hook but I figured it's nice to have structure)
+
+hook.Add("AddToolMenuTabs", "heavylight", function()
+	spawnmenu.AddToolTab("heavylight","HeavyLight", "icon16/asterisk_yellow.png")
+end)
+
+hook.Add("AddToolMenuCategories","heavylight",function()
+	spawnmenu.AddToolCategory("heavylight", "heavylight_main", "HeavyLight")
+	spawnmenu.AddToolCategory("heavylight", "heavylight_modules", "Modules")
+	spawnmenu.AddToolCategory("heavylight", "heavylight_renderers", "Renderers")
+	spawnmenu.AddToolCategory("heavylight", "heavylight_blenders", "Blenders")
+end)
+
+
+-- Add actual options:
+hook.Add("PopulateToolMenu", "heavylight", function()
+	spawnmenu.AddToolMenuOption("heavylight","heavylight_main", "heavylight_main_ui", "Control", "", nil, function(cpanel)
+		print(cpanel)
+		cpanel:AddItem(GetMainUI())
+		print(GetMainUI():GetParent())
+	end)
+end)
