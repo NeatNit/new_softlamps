@@ -142,6 +142,14 @@ debug.getregistry().HeavyLightModule = HeavyLightModule
 
 
 
+--[[-------------------------------------------------------------------------
+Load modules
+---------------------------------------------------------------------------]]
+local mods, b = file.Find("lua/heavylight/*.lua", "GAME")
+for _, mod in ipairs(mods) do
+	include("heavylight/" .. mod)
+end
+
 
 
 --[[-------------------------------------------------------------------------
