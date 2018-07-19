@@ -21,7 +21,7 @@ debug.getregistry().HeavyLightBase = HeavyLightBase
 --[[-------------------------------------------------------------------------
 Set/GetName - friendly name / title
 ---------------------------------------------------------------------------]]
-AccessorFunc(HeavyLightBase, "_name", Name, FORCE_STRING)
+AccessorFunc(HeavyLightBase, "_name", "Name", FORCE_STRING)
 
 --[[-------------------------------------------------------------------------
 Set/GetParent - sets/gets a parent entity (or other object) so the module gets
@@ -144,68 +144,6 @@ debug.getregistry().HeavyLightModule = HeavyLightModule
 
 
 
-
---[[-------------------------------------------------------------------------
-The HeavyLight Library
----------------------------------------------------------------------------]]
-local _G = _G
-module("heavylight")
-
-function NewModule()
-	local m = setmetatable({}, HeavyLightModule)
-	Modules[m] = m
-	return m
-end
-
-function NewBlender()
-	local b = setmetatable({}, HeavyLightBlender)
-	Blenders[b] = b
-	return b
-end
-
-function NewRenderer()
-	local r = setmetatable({}, HeavyLightRenderer)
-	Renderers[r] = r
-	return r
-end
-
-
-local function DoHeavyLightRender()
-	local a = true
-	hook.Add("RenderScene", "HeavyLight", function()
-		if a then a = false return end
-
-		local lamp = ents.FindByClass("hl_softlamp")[1]
-		hook.Remove("RenderScene", "HeavyLight")
-
-		mat_copy:SetTexture("$basetexture", tex_scrfx)
-		local i = 0
-		while lamp:NextPT() do
-			i = i + 1
-			--render.Clear(255, 255, 255)
-			render.RenderView()
-			render.UpdateScreenEffectTexture()
-
-			render.PushRenderTarget(tex_blend)
-				mat_copy:SetFloat("$alpha", 1 / i)
-				render.SetMaterial(mat_copy)
-				render.DrawScreenQuad()
-			render.PopRenderTarget()
-		end
-
-		mat_copy:SetTexture("$basetexture", tex_blend)
-		mat_copy:SetFloat("$alpha", 1)
-		render.SetMaterial(mat_copy)
-		render.DrawScreenQuad()
-
-		return true
-	end)
-
-	RunConsoleCommand("poster", 1)
-end
-
-
-
 --[[-------------------------------------------------------------------------
 GUI
 ---------------------------------------------------------------------------]]
@@ -274,7 +212,6 @@ end
 hook.Add("AddToolMenuTabs", "heavylight", function()
 	spawnmenu.AddToolTab("heavylight","HeavyLight", "icon16/asterisk_yellow.png")
 end)
-
 hook.Add("AddToolMenuCategories","heavylight",function()
 	spawnmenu.AddToolCategory("heavylight", "heavylight_main", "HeavyLight")
 	spawnmenu.AddToolCategory("heavylight", "heavylight_modules", "Modules")
@@ -282,12 +219,98 @@ hook.Add("AddToolMenuCategories","heavylight",function()
 	spawnmenu.AddToolCategory("heavylight", "heavylight_blenders", "Blenders")
 end)
 
+local current_parent = nil
+local function SetAutoDockTo(parent)
+	local old_Think = type(parent.Think) == "function" and parent.Think or DoNothing
+
+	function parent:Think(...)
+		if current_parent ~= self --[[and self:IsVisible() -- Think should guarantee this]] then
+			current_parent = self
+			GetMainUI():SetParent(self)
+			GetMainUI():Dock(TOP)
+		end
+		old_Think(self, ...)
+	end
+end
 
 -- Add actual options:
 hook.Add("PopulateToolMenu", "heavylight", function()
 	spawnmenu.AddToolMenuOption("heavylight","heavylight_main", "heavylight_main_ui", "Control", "", nil, function(cpanel)
-		print(cpanel)
 		cpanel:AddItem(GetMainUI())
-		print(GetMainUI():GetParent())
+		local parent = GetMainUI():GetParent()
+
+		SetAutoDockTo(parent)
+	end)
+
+	spawnmenu.AddToolMenuOption("heavylight","heavylight_modules", "heavylight_superdof", "SuperDOF", "", nil, function(cpanel)
+		cpanel:AddItem(GetMainUI())
+		local parent = GetMainUI():GetParent()
+
+		SetAutoDockTo(parent)
 	end)
 end)
+
+
+
+
+
+--[[-------------------------------------------------------------------------
+The HeavyLight Library
+---------------------------------------------------------------------------]]
+local _G = _G
+module("heavylight")
+
+function NewModule()
+	local m = setmetatable({}, HeavyLightModule)
+	Modules[m] = m
+	return m
+end
+
+function NewBlender()
+	local b = setmetatable({}, HeavyLightBlender)
+	Blenders[b] = b
+	return b
+end
+
+function NewRenderer()
+	local r = setmetatable({}, HeavyLightRenderer)
+	Renderers[r] = r
+	return r
+end
+
+
+local function DoHeavyLightRender()
+	local a = true
+	hook.Add("RenderScene", "HeavyLight", function()
+		if a then a = false return end
+
+		local lamp = ents.FindByClass("hl_softlamp")[1]
+		hook.Remove("RenderScene", "HeavyLight")
+
+		mat_copy:SetTexture("$basetexture", tex_scrfx)
+		local i = 0
+		while lamp:NextPT() do
+			i = i + 1
+			--render.Clear(255, 255, 255)
+			render.RenderView()
+			render.UpdateScreenEffectTexture()
+
+			render.PushRenderTarget(tex_blend)
+				mat_copy:SetFloat("$alpha", 1 / i)
+				render.SetMaterial(mat_copy)
+				render.DrawScreenQuad()
+			render.PopRenderTarget()
+		end
+
+		mat_copy:SetTexture("$basetexture", tex_blend)
+		mat_copy:SetFloat("$alpha", 1)
+		render.SetMaterial(mat_copy)
+		render.DrawScreenQuad()
+
+		return true
+	end)
+
+	RunConsoleCommand("poster", 1)
+end
+
+
