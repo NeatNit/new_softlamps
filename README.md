@@ -1,3 +1,9 @@
+# TO DO
+
+Make this file useful for keeping track of my goals!
+
+----
+
 Types of HeavyLight modules:
 
 1. Multipliers - modules that change something in the world or something in the camera view before each render. Examples: soft lamps, Super DOF
