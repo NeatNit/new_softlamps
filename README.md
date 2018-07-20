@@ -3,13 +3,13 @@
 ## HeavyLightBase
 All HeavyLight addons are derived from this class.
 
-### Item: AddToMenu
-Similar to the TOOL structure, set this to `false` to make the module not appear on the menu.
-
 ### Item: Name
 (string) Nice name which will appear in the menu. This can use language strings.
 
-### Hook-like: BuildCPanel
+### Item: AddToMenu
+Similar to the TOOL structure, set this to `false` to make the module not appear on the menu.
+
+### Item: BuildCPanel(cpanel)
 This element is required if AddToMenu is not `false`.
 
 Works exactly like TOOL's BuildCPanel function. It's a function with one parameter, the ControlPanel (DForm) to which you can add controls. The 'self' argument isn't provided! See TOOL definitions for examples.
