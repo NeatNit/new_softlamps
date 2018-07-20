@@ -1,48 +1,68 @@
-# TO DO
+# Classes
 
-Make this file useful for keeping track of my goals!
-
----
-
-## Classes
-
-### HeavyLightBase
+## HeavyLightBase
 All HeavyLight addons are derived from this class.
 
-#### Hook: Start
+### Hook: Start
 This hook is optional.
 
 The HeavyLight rendering is beginning, perform any preperations necessary - e.g. turn off any visuals that are intended for gameplay only.
 
-#### Hook: End
+Argument: Table of:
+- \["stack"] - array of active modules, in order from outermost to innermost
+- \["renderer"] - active renderer
+- \["blender"] - active blender
+
+### Hook: End
 This hook is optional.
 
 The HeavyLight rendering process has finished, gameplay is now resuming.
 
-#### Method: IsActive
+### Method: IsActive
 Get whether this module is active in the current HeavyLight stack.
 
-#### Hook: IsAvailable
+### Hook: IsAvailable
 This hook is optional, and by default always returns `true`.
 
 Return whether this module is available to be made active.
 
-#### Item: AddToMenu
+### Item: AddToMenu
 Similar to the TOOL structure, set this to `false` to make the module not appear on the menu.
 
-#### Hook-like: BuildCPanel
+### Hook-like: BuildCPanel
 This element is required if AddToMenu is not `false`.
 
 Works exactly like TOOL's BuildCPanel function. It's a function with one parameter, the ControlPanel (DForm) to which you can add controls. The 'self' argument isn't provided! See TOOL definitions for examples.
 
 Notably, the top HeavyLight UI will already be added when this function is called, and your custom UI will be insterted below.
 
-### HeavyLightIterativeBase
-Derived from HeavyLightBase, parent to HeavyLightModule and HeavyLightRenderer - both can be iterative.
+## HeavyLightIterativeBase
+Derived from HeavyLightBase, parent of HeavyLightModule and HeavyLightRenderer - both can be iterative.
+
+### Method: SetPassesCount
+Argument: (non-negative integer) number of passes (iterations) this element will create.
+
+This is 1 by default. If set to 1, it's not actually iterative (there's just 1 iteration) and it will not get a progress bar at the bottom of the screen when used.
+
+Set it to 0 to say "I don't know and I'll tell you in real-time".
+
+### Method: GetPassesCount
+Returns the value set by SetPassesCount.
+
+### Method: GetCurrentPass
+Gets which pass this is for this module. Starts at 1, ends at GetPassesCount().
 
 
-### HeavyLightModule
-#### Method: GetPlace
+## HeavyLightModule
+### Method: Activate(place)
+Insert the module into the stack. After this, IsActive will be true.
+
+Throws an error if IsAvailable returns false.
+
+Argument: (optional integer) *place* - where in the stack to insert this module (later returned by GetPlace). If not provided or is larger than the number of active modules, it will be inserted as the last (deepest) module.
+
+
+### Method: GetPlace
 Get the module's position in the current HeavyLight stack, starting at 1 for the outer-most module. If the module is not in the stack (e.g. IsActive() is false), returns `false`.
 
 
