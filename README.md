@@ -3,31 +3,11 @@
 ## HeavyLightBase
 All HeavyLight addons are derived from this class.
 
-### Hook: Start
-This hook is optional.
-
-The HeavyLight rendering is beginning, perform any preperations necessary - e.g. turn off any visuals that are intended for gameplay only.
-
-Argument: Table of:
-- \["stack"] - array of active modules, in order from outermost to innermost
-- \["renderer"] - active renderer
-- \["blender"] - active blender
-
-### Hook: End
-This hook is optional.
-
-The HeavyLight rendering process has finished, gameplay is now resuming.
-
-### Method: IsActive
-Get whether this module is active in the current HeavyLight stack.
-
-### Hook: IsAvailable
-This hook is optional, and by default always returns `true`.
-
-Return whether this module is available to be made active.
-
 ### Item: AddToMenu
 Similar to the TOOL structure, set this to `false` to make the module not appear on the menu.
+
+### Item: Name
+(string) Nice name which will appear in the menu. This can use language strings.
 
 ### Hook-like: BuildCPanel
 This element is required if AddToMenu is not `false`.
@@ -36,11 +16,49 @@ Works exactly like TOOL's BuildCPanel function. It's a function with one paramet
 
 Notably, the top HeavyLight UI will already be added when this function is called, and your custom UI will be insterted below.
 
+### Hook: Start(info)
+This hook is optional.
+
+The HeavyLight rendering is beginning, perform any preperations necessary - e.g. turn off any visuals that are intended for gameplay only.
+
+Argument: *info* - Table of:
+- \["stack"] - array of active modules, in order from outermost to innermost
+- \["renderer"] - active renderer
+- \["blender"] - active blender
+
+### Hook: End(info)
+This hook is optional.
+
+The HeavyLight rendering process has finished, gameplay is now resuming.
+
+Argument: *info* - Table of:
+- \["stack"] - array of active modules, in order from outermost to innermost
+- \["renderer"] - active renderer
+- \["blender"] - active blender
+
+### Hook: MenuOpened
+This hook is optional.
+
+Gets called every time the user switches from a different module menu to this module's menu.
+
+### Hook: IsAvailable
+This hook is optional, and by default always returns `true`.
+
+Return whether this module is available to be made active.
+
+### Method: SetAvailable(available)
+Argument: (boolean) *available* - whether the module is available.
+
+This overwrites IsAvailable with a function that returns the value you specify.
+
+### Method: IsActive
+Get whether this module is active in the current HeavyLight stack.
+
 ## HeavyLightIterativeBase
 Derived from HeavyLightBase, parent of HeavyLightModule and HeavyLightRenderer - both can be iterative.
 
-### Method: SetPassesCount
-Argument: (non-negative integer) number of passes (iterations) this element will create.
+### Method: SetPassesCount(count)
+Argument: (non-negative integer) *count* - number of passes (iterations) this element will create.
 
 This is 1 by default. If set to 1, it's not actually iterative (there's just 1 iteration) and it will not get a progress bar at the bottom of the screen when used.
 
@@ -50,7 +68,7 @@ Set it to 0 to say "I don't know and I'll tell you in real-time".
 Returns the value set by SetPassesCount.
 
 ### Method: GetCurrentPass
-Gets which pass this is for this module. Starts at 1, ends at GetPassesCount().
+Gets which pass this is for this module. Starts at 1, ends at GetPassesCount(). Returns 0 if there is no active pass (e.g. HeavyLight isn't running, this module is not in the stack, or this module is deeper down in the stack than the code currently running).
 
 
 ## HeavyLightModule
