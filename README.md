@@ -2,7 +2,38 @@
 
 Make this file useful for keeping track of my goals!
 
-----
+---
+
+## Classes
+
+### HeavyLightBase
+All HeavyLight addons are derived from this class, contain these methods, and must implement these hooks (some are optional):
+
+#### Hook: Start
+This hook is optional.
+
+The HeavyLight rendering is beginning, perform any preperations necessary - e.g. turn off any visuals that are intended for gameplay only.
+
+#### Hook: End
+This hook is optional.
+
+The HeavyLight rendering process has finished, gameplay is now resuming.
+
+#### Method: IsActive
+Get whether this module is active in the current HeavyLight stack.
+
+#### "Hook": BuildCPanel
+This element is required.
+
+Works exactly like TOOL's BuildCPanel function. It's a function with one parameter, the ControlPanel (DForm) to which you can add controls. The 'self' argument isn't provided! See TOOL definitions for examples.
+
+Notably, the top HeavyLight UI will already be added when this function is called, and your custom UI will be insterted below.
+
+
+### HeavyLightModule
+#### Method: GetPlace
+Get the module's position in the current HeavyLight stack, starting at 1 for the outer-most module. If the module is not in the stack, returns `false`.
+
 
 Types of HeavyLight modules:
 
