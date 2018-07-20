@@ -6,6 +6,9 @@ All HeavyLight addons are derived from this class.
 ### Item: Name
 (string) Nice name which will appear in the menu. This can use language strings.
 
+### Item: Icon
+(string) A 64x64 icon to disaplay. Defaults to the "<filename>.png".
+
 ### Item: AddToMenu
 Similar to the TOOL structure, set this to `false` to make the module not appear on the menu.
 
@@ -20,6 +23,8 @@ Notably, the top HeavyLight UI will already be added when this function is calle
 This hook is optional.
 
 The HeavyLight rendering is beginning, perform any preperations necessary - e.g. turn off any visuals that are intended for gameplay only.
+
+Return `false, reason` to cancel the operation, where `reason` is a string explaining why (shown to the user).
 
 Argument: *info* - Table of:
 - \["stack"] - array of active modules, in order from outermost to innermost
@@ -44,12 +49,14 @@ Gets called every time the user switches from a different module menu to this mo
 ### Hook: IsAvailable
 This hook is optional, and by default always returns `true`.
 
-Return whether this module is available to be made active.
+Return whether this module is available to be made active. When returning false, you can (and should) provide a second return value, a string explaining to the user why this isn't available.
 
-### Method: SetAvailable(available)
-Argument: (boolean) *available* - whether the module is available.
+### Method: SetAvailable(available, reason)
+This overwrites IsAvailable with a function that always returns the values you specify.
 
-This overwrites IsAvailable with a function that returns the value you specify.
+Arguments:
+- (boolean) *available* - whether the module is available.
+- (optional string) *reason* - if false, explain (to the user) why this isn't available. This may be a language string.
 
 ### Method: IsActive
 Get whether this module is active in the current HeavyLight stack.
@@ -70,6 +77,14 @@ Returns the value set by SetPassesCount.
 ### Method: GetCurrentPass
 Gets which pass this is for this module. Starts at 1, ends at GetPassesCount(). Returns 0 if there is no active pass (e.g. HeavyLight isn't running, this module is not in the stack, or this module is deeper down in the stack than the code currently running).
 
+### Hook: Run(view, info, pass, outof)
+Run your code, do your thing! A renderer is expected to draw to the active render target. A module is expected to change something in the world or in the view.
+
+Arguments:
+- *view* - [ViewData structure](http://wiki.garrysmod.com/page/Structures/ViewData) with some of the more basic fields already filled in.
+- *info* - same as in the hooks Start and End.
+- *pass* - equal to `self:GetCurrentPass()`.
+- *outof* - equal to `self:GetPassesCount()`.
 
 ## HeavyLightModule
 ### Method: Activate(place)
@@ -79,9 +94,20 @@ Throws an error if IsAvailable returns false.
 
 Argument: (optional integer) *place* - where in the stack to insert this module (later returned by GetPlace). If not provided or is larger than the number of active modules, it will be inserted as the last (deepest) module.
 
+### Method: Deactivate
+Remove the module from the stack. After this, IsActive will be false.
+If the module is not in the stack, does nothing.
 
 ### Method: GetPlace
 Get the module's position in the current HeavyLight stack, starting at 1 for the outer-most module. If the module is not in the stack (e.g. IsActive() is false), returns `false`.
+
+## HeavyLightRenderer
+### Method: Activate
+Set this as the active Renderer for any upcoming HeavyLight renders. After this, IsActive will be true.
+
+Throws an error if IsAvailable returns false.
+
+Note that the only way to become inactive afterwards is when another renderer is activated. If IsAvailable becomes `false` while active, HeavyLight will not allow the user to start a render until a different renderer is selected or IsAvailable becomes true again.
 
 
 Types of HeavyLight modules:
