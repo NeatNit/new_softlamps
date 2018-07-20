@@ -9,11 +9,8 @@ All HeavyLight addons are derived from this class.
 ### Item: Icon
 (string) A 64x64 icon to disaplay. Defaults to the "<filename>.png".
 
-### Item: AddToMenu
-Similar to the TOOL structure, set this to `false` to make the module not appear on the menu.
-
 ### Item: BuildCPanel(cpanel)
-This element is required if AddToMenu is not `false`.
+This element is required.
 
 Works exactly like TOOL's BuildCPanel function. It's a function with one parameter, the ControlPanel (DForm) to which you can add controls. The 'self' argument isn't provided! See TOOL definitions for examples.
 
