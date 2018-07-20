@@ -7,7 +7,7 @@ Make this file useful for keeping track of my goals!
 ## Classes
 
 ### HeavyLightBase
-All HeavyLight addons are derived from this class, contain these methods, and must implement these hooks (some are optional):
+All HeavyLight addons are derived from this class.
 
 #### Hook: Start
 This hook is optional.
@@ -22,17 +22,28 @@ The HeavyLight rendering process has finished, gameplay is now resuming.
 #### Method: IsActive
 Get whether this module is active in the current HeavyLight stack.
 
-#### "Hook": BuildCPanel
-This element is required.
+#### Hook: IsAvailable
+This hook is optional, and by default always returns `true`.
+
+Return whether this module is available to be made active.
+
+#### Item: AddToMenu
+Similar to the TOOL structure, set this to `false` to make the module not appear on the menu.
+
+#### Hook-like: BuildCPanel
+This element is required if AddToMenu is not `false`.
 
 Works exactly like TOOL's BuildCPanel function. It's a function with one parameter, the ControlPanel (DForm) to which you can add controls. The 'self' argument isn't provided! See TOOL definitions for examples.
 
 Notably, the top HeavyLight UI will already be added when this function is called, and your custom UI will be insterted below.
 
+### HeavyLightIterativeBase
+Derived from HeavyLightBase, parent to HeavyLightModule and HeavyLightRenderer - both can be iterative.
+
 
 ### HeavyLightModule
 #### Method: GetPlace
-Get the module's position in the current HeavyLight stack, starting at 1 for the outer-most module. If the module is not in the stack, returns `false`.
+Get the module's position in the current HeavyLight stack, starting at 1 for the outer-most module. If the module is not in the stack (e.g. IsActive() is false), returns `false`.
 
 
 Types of HeavyLight modules:
