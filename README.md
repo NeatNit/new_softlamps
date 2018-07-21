@@ -58,6 +58,10 @@ Arguments:
 ### Method: IsActive
 Get whether this module is active in the current HeavyLight stack.
 
+
+
+
+
 ## HeavyLightIterativeBase
 Derived from HeavyLightBase, parent of HeavyLightModule and HeavyLightRenderer - both can be iterative.
 
@@ -83,6 +87,19 @@ Arguments:
 - *pass* - equal to `self:GetCurrentPass()`.
 - *outof* - equal to `self:GetPassesCount()`.
 
+Return values: If SetPassesCount was set to 0, or for any reason the set count is no longer true, the following return values are needed:
+1. (number) *passes_remaining* - how many passes *after* this one the module expects to make. In particular, the sign of this number is interpreted as:
+
+    - Negative: "I didn't actually do anything, I was done on the previous iteration - act as if the previous iteration returned zero" (I don't know how your module is built, maybe you couldn't know this in advance)
+    - Zero: "This is my last iteration, do not call Run again"
+    - Positive: "There are more iterations to follow"
+
+2. (optional number) *progress* - number between 0 and 1, how much to visually fill the progress bar? (default: *pass/(pass + passes_remaining)*)
+3. (optional string) *progress_text* - text to display on the progress bar. (default: *pass .. "/" .. (pass + passes_remaining)*)
+
+
+
+
 ## HeavyLightModule
 ### Method: Activate(place)
 Insert the module into the stack. After this, IsActive will be true.
@@ -98,7 +115,13 @@ If the module is not in the stack, does nothing.
 ### Method: GetPlace
 Get the module's position in the current HeavyLight stack, starting at 1 for the outer-most module. If the module is not in the stack (e.g. IsActive() is false), returns `false`.
 
+
+
+
+
 ## HeavyLightRenderer
+
+
 ### Method: Activate
 Set this as the active Renderer for any upcoming HeavyLight renders. After this, IsActive will be true.
 
@@ -106,6 +129,15 @@ Throws an error if IsAvailable returns false.
 
 Note that the only way to become inactive afterwards is when another renderer is activated. If IsAvailable becomes `false` while active, HeavyLight will not allow the user to start a render until a different renderer is selected or IsAvailable becomes true again.
 
+
+
+
+
+## HeavyLightBlender
+
+
+
+-----------------------------
 
 Types of HeavyLight modules:
 
