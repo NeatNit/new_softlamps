@@ -7,7 +7,7 @@ All HeavyLight addons are derived from this class.
 (string) Nice name which will appear in the menu. This can use language strings.
 
 ### Item: Icon
-(string) A 64x64 icon to disaplay. Defaults to the "<filename>.png".
+(string) A 64x64 icon to disaplay. Defaults to "\<filename\>.png".
 
 ### Item: BuildCPanel(cpanel)
 This element is required.
@@ -27,16 +27,26 @@ Argument: *info* - Table of:
 - \["stack"] - array of active modules, in order from outermost to innermost
 - \["renderer"] - active renderer
 - \["blender"] - active blender
+- \["poster"] - table of:
+    - \["size"] - poster size
+    - \["pass"] - current pass (in Start or End, will always be nil)
+    - \["total"] - total passes, equal to size suared
 
 ### Hook: End(info)
 This hook is optional.
 
 The HeavyLight rendering process has finished, gameplay is now resuming.
 
-Argument: *info* - Table of:
-- \["stack"] - array of active modules, in order from outermost to innermost
-- \["renderer"] - active renderer
-- \["blender"] - active blender
+Argument: *info* - same as in Start.
+
+### Hook: Reset(info)
+For Modules and the Renderer, called when they need to prepare for another go after they've finished their last Run - e.g. when using SoftLamps under SuperDoF, SoftLamps will be Reset every time it's done and SuperDoF will be run once.
+
+For the Blender, it acts similarly when one part of the poster
+
+By default, this will just call Start.
+
+Argument: same as Start.
 
 ### Hook: MenuOpened
 This hook is optional.
@@ -101,6 +111,8 @@ Return values: If SetPassesCount was set to 0, or for any reason the set count i
 
 
 ## HeavyLightModule
+Derived from HeavyLightIterativeBase. These can be stacked on top of each other, and each one is expected to be self-contained.
+
 ### Method: Activate(place)
 Insert the module into the stack. After this, IsActive will be true.
 
@@ -120,7 +132,7 @@ Get the module's position in the current HeavyLight stack, starting at 1 for the
 
 
 ## HeavyLightRenderer
-
+Derived from HeavyLightIterativeBase. See its Run hook for details.
 
 ### Method: Activate
 Set this as the active Renderer for any upcoming HeavyLight renders. After this, IsActive will be true.
@@ -134,7 +146,30 @@ Note that the only way to become inactive afterwards is when another renderer is
 
 
 ## HeavyLightBlender
+### Method: Activate
+Set this as the active Blender for any upcoming HeavyLight renders. After this, IsActive will be true.
 
+Throws an error if IsAvailable returns false.
+
+Note that the only way to become inactive afterwards is when another blender is activated. If IsAvailable becomes `false` while active, HeavyLight will not allow the user to start a render until a different blender is selected or IsAvailable becomes true again.
+
+### Hook: PreRender(info)
+Optional. Called just before the renderer runs. You may want to render.PushRenderTarget something.
+
+### Hook: PostRender(info)
+Required. Called just after the renderer runs.
+
+You should process the rendered image and save it in some way, because if it gets overwritten in a moment, you didn't accomplish anything.
+
+If you pushed a render target in PreRender, you should pop it here.
+
+### Hook: Preview(info)
+Required. Called after PostRender when we want to show a preview on the screen. Not necessarily called every time!
+
+Draw something to th screen to show the user progress. Draw progress bars somewhere of the screen - if you don't need custom progress bars (which 99% of the time, you really don't), you can call the heavylight library's function to draw them for you.
+
+### Hook: Finalize
+Called after the last PostRender, and should draw on the screen the final image, the blend of all 
 
 
 -----------------------------
