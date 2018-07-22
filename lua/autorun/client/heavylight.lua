@@ -115,9 +115,21 @@ function HeavyLightBase:IsActive()
 	error("This should be overwritten by child classes!")
 end
 
+--[[-------------------------------------------------------------------------
+Activated (hook) - Called when the module has been activated.
 
+Arguments:
+	Info - new info, see top of this file
+	Place - HeavyLightModules will get their new place in the stack
+---------------------------------------------------------------------------]]
+HeavyLightBase.Activated = DoNothing
 
+--[[-------------------------------------------------------------------------
+Deactivated (hook) - Called when the module has been removed from the stack.
 
+No args.
+---------------------------------------------------------------------------]]
+HeavyLightBase.Deactivated = DoNothing
 
 
 
@@ -276,8 +288,24 @@ local HeavyLightRenderer = setmetatable({}, HeavyLightIterativeBase)
 HeavyLightRenderer.__index = HeavyLightRenderer
 debug.getregistry().HeavyLightRenderer = HeavyLightRenderer
 
+--[[-------------------------------------------------------------------------
+Activate - Set this as the active Renderer for any upcoming HeavyLight
+	renders. After this, IsActive will be true.
+
+	Note that the only way to become inactive afterwards is when another
+	renderer is activated. If IsAvailable is false while active, HeavyLight
+	will not allow the user to start a render until a different renderer is
+	selected or IsAvailable becomes true again.
+---------------------------------------------------------------------------]]
+function HeavyLightBlender:Activate()
+	heavylight.SetActiveRenderer(self)
+end
+
+--[[-------------------------------------------------------------------------
+IsActive
+---------------------------------------------------------------------------]]
 function HeavyLightRenderer:IsActive()
-	error("to do")
+	return heavylight.GetCurrentSettings().renderer == self
 end
 
 
@@ -290,11 +318,27 @@ end
 HeavyLightModule
 ================
 Module that can be part of the stack, like Soft Lamps or SuperDOF. They can
-	change something in the world or
+	change something in the world or in the view.
+
+	See HeavyLightIterativeBase:Run for details.
 ---------------------------------------------------------------------------]]
 local HeavyLightModule = setmetatable({}, HeavyLightIterativeBase)
 HeavyLightModule.__index = HeavyLightModule
 debug.getregistry().HeavyLightModule = HeavyLightModule
+
+--[[-------------------------------------------------------------------------
+Activate - Insert the module into the stack. After this, IsActive will be
+	true.
+
+Argument: (optional integer) place - where in the stack to insert this module
+	(later returned by GetPlace). If not provided or is larger than the
+	number of active modules, it will be inserted as the last (deepest)
+	module.
+---------------------------------------------------------------------------]]
+function HeavyLightModule:Activate(place)
+	heavylight.ActivateModule(self, place)
+end
+
 
 
 
