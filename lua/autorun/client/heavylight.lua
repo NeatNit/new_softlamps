@@ -136,13 +136,57 @@ debug.getregistry().HeavyLightBlender = HeavyLightBlender
 Activate (method) Set this as the active Blender for any upcoming HeavyLight
 	renders. After this, IsActive will be true.
 
-	Throws an error if IsAvailable returns false.
-
 	Note that the only way to become inactive afterwards is when another
-	blender is activated. If IsAvailable becomes false while active,
+	blender is activated. If IsAvailable is false while active,
 	HeavyLight will not allow the user to start a render until a different
 	blender is selected or IsAvailable becomes true again.
 ---------------------------------------------------------------------------]]
+function HeavyLightBlender:Activate()
+	heavylight.SetActiveBlender(self)
+end
+
+--[[-------------------------------------------------------------------------
+IsActive
+---------------------------------------------------------------------------]]
+function HeavyLightBlender:IsActive()
+	return heavylight.GetCurrentSettings().blender == self
+end
+
+--[[-------------------------------------------------------------------------
+PreRender (hook) - Optional. Called just before the renderer runs. You may
+	want to render.PushRenderTarget something.
+
+param: info (see top of this file)
+---------------------------------------------------------------------------]]
+HeavyLightBlender.PreRender = DoNothing
+
+--[[-------------------------------------------------------------------------
+PostRender (hook) - Required. Called just after the renderer runs.
+
+	You should process the rendered image and save it in some way, because if
+	it gets overwritten in a moment, you didn't accomplish anything.
+
+	If you pushed a render target in PreRender, you should pop it here.
+---------------------------------------------------------------------------]]
+
+
+--[[-------------------------------------------------------------------------
+Preview (hook) - Required. Called after PostRender when we want to show a
+	preview on the screen. Not necessarily called every time!
+
+	Draw something to th screen to show the user progress. Draw progress bars
+	somewhere of the screen - if you don't need custom progress bars
+	(which 99% of the time, you really don't), you can call the heavylight
+	library's function to draw them for you.
+---------------------------------------------------------------------------]]
+
+
+--[[-------------------------------------------------------------------------
+Finalize (hook) - Called after the last PostRender, and should draw on the
+	screen the final image, the blend of all the renders so far.
+---------------------------------------------------------------------------]]
+
+
 
 
 
@@ -162,8 +206,59 @@ debug.getregistry().HeavyLightIterativeBase = HeavyLightIterativeBase
 Set/GetPassesCount - sets/gets the number of iterations this module
 	expects to make. This is not binding.
 ---------------------------------------------------------------------------]]
-AccessorFunc(HeavyLightBase, "_passes", "PassesCount", FORCE_NUMBER)
-HeavyLightBase:SetPassesCount(1) -- default
+AccessorFunc(HeavyLightIterativeBase, "_passes", "PassesCount", FORCE_NUMBER)
+HeavyLightIterativeBase:SetPassesCount(1) -- default
+
+--[[-------------------------------------------------------------------------
+GetCurrentPass - Gets which pass this is for this module. Starts at 1, ends
+	at GetPassesCount(). Returns 0 if there is no active pass
+	(e.g. HeavyLight isn't running, this module is not in the stack, or this
+	module is deeper down in the stack than the code currently running).
+
+Note: SetCurrentPass is internal!!
+---------------------------------------------------------------------------]]
+AccessorFunc(HeavyLightIterativeBase, "_pass", "CurrentPass", FORCE_NUMBER)
+HeavyLightIterativeBase:SetCurrentPass(0) -- default
+
+--[[-------------------------------------------------------------------------
+Run (hook) - Run your code, do your thing! A renderer is expected to draw to
+	the active render target. A module is expected to change something in the
+	world or in the view.
+
+Arguments:
+	view - ViewData structure with some of the more basic fields already
+		filled in. You can modify this view and any changes will propagate
+		forwards (deeper) into the stack, but not backwards. (Each module's
+		view is basically derived from the previous module's view)
+
+		Has one extra key - "weight" - which determines basically the
+		weight of this frame. Default is 1. Depends on the Blender's
+		implementation.
+	info - see top of this file
+	pass - equal to self:GetCurrentPass().
+	outof - equal to self:GetPassesCount().
+
+Return values: If SetPassesCount was set to 0, or for any reason the set
+	count is no longer true, the following return values are needed:
+
+	1. (number) passes_remaining - how many passes after this one the module
+		expects to make. In particular, the sign of this number is
+		interpreted as:
+			Negative: "I didn't actually do anything, I was done on the
+				previous iteration - act as if the previous iteration
+				returned zero" (I don't know how your module is built, maybe
+				you couldn't know this in advance)
+			Zero: "This is my last iteration, do not call Run again"
+			Positive: "There are more iterations to follow"
+	2. (optional number) progress - number between 0 and 1, how much to
+		visually fill the progress bar
+		(default: pass/(pass + passes_remaining))
+	3. (optional string) progress_text - text to display on the progress bar
+		(default: pass .. "/" .. (pass + passes_remaining))
+---------------------------------------------------------------------------]]
+
+
+
 
 
 
@@ -206,7 +301,7 @@ debug.getregistry().HeavyLightModule = HeavyLightModule
 --[[-------------------------------------------------------------------------
 Load modules
 ---------------------------------------------------------------------------]]
-local mods, b = file.Find("lua/heavylight/*.lua", "GAME")
+local mods = file.Find("lua/heavylight/*.lua", "GAME")
 for _, mod in ipairs(mods) do
 	include("heavylight/" .. mod)
 end
