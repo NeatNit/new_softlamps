@@ -3,6 +3,9 @@
 ## HeavyLightBase
 All HeavyLight addons are derived from this class.
 
+### Item: id
+(string) The filename of the module. Filled automatically, do not overwrite!
+
 ### Item: Name
 (string) Nice name which will appear in the menu. This can use language strings.
 
@@ -93,6 +96,8 @@ Run your code, do your thing! A renderer is expected to draw to the active rende
 
 Arguments:
 - *view* - [ViewData structure](http://wiki.garrysmod.com/page/Structures/ViewData) with some of the more basic fields already filled in. You can modify this view and any changes will propagate forwards (deeper) into the stack, but not backwards. (Each module's view is basically derived from the previous module's view)
+
+    Has one extra key - "weight" - which determines basically the importance of this frame. Default is 1. Depends on the Blender's implementation.
 - *info* - same as in the hooks Start and End.
 - *pass* - equal to `self:GetCurrentPass()`.
 - *outof* - equal to `self:GetPassesCount()`.
