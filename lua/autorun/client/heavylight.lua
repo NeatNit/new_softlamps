@@ -11,8 +11,8 @@ Blenders, Modules and Renderers repositories.
 	Value = actual module object
 ---------------------------------------------------------------------------]]
 local Modules = {}
-local Blenders = {}
 local Renderers = {}
+local Blenders = {}
 
 
 --[[-------------------------------------------------------------------------
@@ -374,7 +374,7 @@ end
 
 
 --[[-------------------------------------------------------------------------
-Load modules
+Load Modules
 ---------------------------------------------------------------------------]]
 local mods = file.Find("lua/heavylight/modules/*.lua", "GAME")
 for _, modfile in ipairs(mods) do
@@ -416,7 +416,7 @@ for _, rendfile in ipairs(rends) do
 end
 
 --[[-------------------------------------------------------------------------
-Load Renderers
+Load Blenders
 ---------------------------------------------------------------------------]]
 local blends = file.Find("lua/heavylight/blenders/*.lua", "GAME")
 for _, blendfile in ipairs(blends) do
@@ -433,7 +433,7 @@ for _, blendfile in ipairs(blends) do
 	include("heavylight/blenders/" .. blendfile)
 
 	-- Add to our internal list
-	Renderers[name] = BLENDER
+	Blenders[name] = BLENDER
 end
 
 
@@ -450,7 +450,7 @@ local function GetMainUI()
 
 	mainui = vgui.Create("DLabel")
 	mainui:SetText("Hello,\nHeavyLight\nWorld!")
-	mainui:SetColor(Color(255, 0, 0))
+	mainui:SetColor(Color(255, 255, 0))
 	mainui:SizeToContents()
 
 	return mainui
@@ -472,7 +472,10 @@ hook.Add("AddToolMenuCategories","heavylight",function()
 end)
 
 local current_parent = nil
-local function SetAutoDockTo(parent)
+local function AddMainUITo(cpanel)
+	cpanel:AddItem(GetMainUI())
+	local parent = GetMainUI():GetParent()
+
 	local old_Think = type(parent.Think) == "function" and parent.Think or DoNothing
 
 	function parent:Think(...)
@@ -488,17 +491,11 @@ end
 -- Add actual options:
 hook.Add("PopulateToolMenu", "heavylight", function()
 	spawnmenu.AddToolMenuOption("heavylight","heavylight_main", "heavylight_main_ui", "Control", "", nil, function(cpanel)
-		cpanel:AddItem(GetMainUI())
-		local parent = GetMainUI():GetParent()
-
-		SetAutoDockTo(parent)
+		AddMainUITo(cpanel)
 	end)
 
 	spawnmenu.AddToolMenuOption("heavylight","heavylight_modules", "heavylight_superdof", "SuperDOF", "", nil, function(cpanel)
-		cpanel:AddItem(GetMainUI())
-		local parent = GetMainUI():GetParent()
-
-		SetAutoDockTo(parent)
+		AddMainUITo(cpanel)
 	end)
 end)
 
