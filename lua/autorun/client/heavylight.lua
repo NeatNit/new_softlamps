@@ -7,7 +7,7 @@ local DoNothing = function() end -- used a bunch of times
 
 --[[-------------------------------------------------------------------------
 Blenders, Modules and Renderers repositories.
-	Key = id (filename)
+	Key = name (filename)
 	Value = actual module object
 ---------------------------------------------------------------------------]]
 local Modules = {}
@@ -18,7 +18,9 @@ local Renderers = {}
 --[[-------------------------------------------------------------------------
 Info - Current stack settings. Can be acquired with
 	heavylight.GetCurrentSettings(). Table of:
-	["stack"] - array of active modules, in order from outermost to innermost
+	["modules"] - array of active modules, in order from outermost to innermost
+		also module name keys which indicate that module's index in the stack,
+			nil if it's not in the stack
 	["renderer"] - active renderer
 	["blender"] - active blender
 	["poster"] - table of:
@@ -27,7 +29,7 @@ Info - Current stack settings. Can be acquired with
 		["total"] - total passes, equal to size suared
 ---------------------------------------------------------------------------]]
 local Info = {
-	stack = {},
+	modules = {},
 
 	poster = {
 		size = 1,
@@ -338,6 +340,35 @@ Argument: (optional integer) place - where in the stack to insert this module
 function HeavyLightModule:Activate(place)
 	heavylight.ActivateModule(self, place)
 end
+
+--[[-------------------------------------------------------------------------
+Deactivate - Remove the module from the stack. After this, IsActive will be
+	false. If the module is not in the stack, does nothing.
+---------------------------------------------------------------------------]]
+function HeavyLightModule:Deactivate()
+	heavylight.DeactivateModule(self)
+end
+
+--[[-------------------------------------------------------------------------
+GetPlace - Get the module's position in the current HeavyLight stack,
+	starting at 1 for the outer-most module. If the module is not in the
+	stack (e.g. IsActive() is false), returns nil.
+
+	Possibly rename this to GetIndex? It sounds more professional, but it
+	also sounds like a more "permenant" thing rather than the changing nature
+	of the stack. I also think "its place in the stack" sounds more correct
+	than "its index in the stack".
+
+	Whatever.
+---------------------------------------------------------------------------]]
+function HeavyLightModule:GetPlace()
+	return heavylight.GetModulePlace(self)
+end
+
+
+
+
+
 
 
 

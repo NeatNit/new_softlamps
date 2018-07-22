@@ -3,10 +3,10 @@
 ## HeavyLightBase
 All HeavyLight addons are derived from this class.
 
-### Item: id
+### Item: Name
 (string) The filename of the module. Filled automatically, do not overwrite!
 
-### Item: Name
+### Item: PrintName
 (string) Nice name which will appear in the menu. This can use language strings.
 
 ### Item: Icon
@@ -174,7 +174,7 @@ Required. Called after PostRender when we want to show a preview on the screen. 
 Draw something to th screen to show the user progress. Draw progress bars somewhere of the screen - if you don't need custom progress bars (which 99% of the time, you really don't), you can call the heavylight library's function to draw them for you.
 
 ### Hook: Finalize
-Called after the last PostRender, and should draw on the screen the final image, the blend of all 
+Called after the last PostRender, and should draw on the screen the final image, the blend of all
 
 
 -----------------------------
