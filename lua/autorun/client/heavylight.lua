@@ -377,10 +377,65 @@ end
 Load modules
 ---------------------------------------------------------------------------]]
 local mods = file.Find("lua/heavylight/modules/*.lua", "GAME")
-for _, mod in ipairs(mods) do
-	local name = string.sub(mod, 1, -5) -- remove the extension
-	include("heavylight/modules/" .. mod)
+for _, modfile in ipairs(mods) do
+	-- Create a new module
+	MODULE = setmetatable({}, HeavyLightModule)
+
+	-- Define its basic parameters
+	local name = string.sub(modfile, 1, -5) -- remove the extension
+	MODULE.Name = name
+	MODULE.PrintName = name -- default
+	MODULE.Icon = "heavylight/modules/" .. name .. ".png"
+
+	-- Run the file
+	include("heavylight/modules/" .. modfile)
+
+	-- Add to our internal list
+	Modules[name] = MODULE
 end
+
+--[[-------------------------------------------------------------------------
+Load Renderers
+---------------------------------------------------------------------------]]
+local rends = file.Find("lua/heavylight/renderers/*.lua", "GAME")
+for _, rendfile in ipairs(rends) do
+	-- Create a new module
+	RENDERER = setmetatable({}, HeavyLightRenderer)
+
+	-- Define its basic parameters
+	local name = string.sub(rendfile, 1, -5) -- remove the extension
+	RENDERER.Name = name
+	RENDERER.PrintName = name
+	RENDERER.Icon = "heavylight/renderers/" .. name .. ".png"
+
+	-- Run the file
+	include("heavylight/renderers/" .. rendfile)
+
+	-- Add to our internal list
+	Renderers[name] = RENDERER
+end
+
+--[[-------------------------------------------------------------------------
+Load Renderers
+---------------------------------------------------------------------------]]
+local blends = file.Find("lua/heavylight/blenders/*.lua", "GAME")
+for _, blendfile in ipairs(blends) do
+	-- Create a new module
+	BLENDER = setmetatable({}, HeavyLightBlender)
+
+	-- Define its basic parameters
+	local name = string.sub(blendfile, 1, -5) -- remove the extension
+	BLENDER.Name = name
+	BLENDER.PrintName = name
+	BLENDER.Icon = "heavylight/blenders/" .. name .. ".png"
+
+	-- Run the file
+	include("heavylight/blenders/" .. blendfile)
+
+	-- Add to our internal list
+	Renderers[name] = BLENDER
+end
+
 
 
 
