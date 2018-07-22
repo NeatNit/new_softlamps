@@ -26,14 +26,7 @@ The HeavyLight rendering is beginning, perform any preperations necessary - e.g.
 
 Return `false, reason` to cancel the operation, where `reason` is a string explaining why (shown to the user).
 
-Argument: *info* - Table of:
-- \["stack"] - array of active modules, in order from outermost to innermost
-- \["renderer"] - active renderer
-- \["blender"] - active blender
-- \["poster"] - table of:
-    - \["size"] - poster size
-    - \["pass"] - current pass (in Start or End, will always be nil)
-    - \["total"] - total passes, equal to size suared
+Argument: *info* - Table with info on the current stack and settings. See top of heavylight.lua for info.
 
 ### Hook: End(info)
 This hook is optional.
@@ -121,8 +114,6 @@ Derived from HeavyLightIterativeBase. These can be stacked on top of each other,
 ### Method: Activate(place)
 Insert the module into the stack. After this, IsActive will be true.
 
-Throws an error if IsAvailable returns false.
-
 Argument: (optional integer) *place* - where in the stack to insert this module (later returned by GetPlace). If not provided or is larger than the number of active modules, it will be inserted as the last (deepest) module.
 
 ### Method: Deactivate
@@ -142,8 +133,6 @@ Derived from HeavyLightIterativeBase. See its Run hook for details.
 ### Method: Activate
 Set this as the active Renderer for any upcoming HeavyLight renders. After this, IsActive will be true.
 
-Throws an error if IsAvailable returns false.
-
 Note that the only way to become inactive afterwards is when another renderer is activated. If IsAvailable becomes `false` while active, HeavyLight will not allow the user to start a render until a different renderer is selected or IsAvailable becomes true again.
 
 
@@ -153,8 +142,6 @@ Note that the only way to become inactive afterwards is when another renderer is
 ## HeavyLightBlender
 ### Method: Activate
 Set this as the active Blender for any upcoming HeavyLight renders. After this, IsActive will be true.
-
-Throws an error if IsAvailable returns false.
 
 Note that the only way to become inactive afterwards is when another blender is activated. If IsAvailable becomes `false` while active, HeavyLight will not allow the user to start a render until a different blender is selected or IsAvailable becomes true again.
 
@@ -178,6 +165,8 @@ Called after the last PostRender, and should draw on the screen the final image,
 
 
 -----------------------------
+
+old, even less up-to-date than the above:
 
 Types of HeavyLight modules:
 
