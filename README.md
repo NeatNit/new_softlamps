@@ -64,6 +64,9 @@ Arguments:
 ### Method: IsActive
 Get whether this module is active in the current HeavyLight stack.
 
+### Hooks: Activated(info[, place])/Deactivated(info)
+Called when the module has been activated or deactivated. For Modules, Activated also has an argument for the new place in the stack.
+
 
 
 

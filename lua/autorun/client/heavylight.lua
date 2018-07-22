@@ -129,7 +129,7 @@ HeavyLightBase.Activated = DoNothing
 --[[-------------------------------------------------------------------------
 Deactivated (hook) - Called when the module has been removed from the stack.
 
-No args.
+Argument: info - new info, see top of this file
 ---------------------------------------------------------------------------]]
 HeavyLightBase.Deactivated = DoNothing
 
@@ -376,9 +376,10 @@ end
 --[[-------------------------------------------------------------------------
 Load modules
 ---------------------------------------------------------------------------]]
-local mods = file.Find("lua/heavylight/*.lua", "GAME")
+local mods = file.Find("lua/heavylight/modules/*.lua", "GAME")
 for _, mod in ipairs(mods) do
-	include("heavylight/" .. mod)
+	local name = string.sub(mod, 1, -5) -- remove the extension
+	include("heavylight/modules/" .. mod)
 end
 
 
