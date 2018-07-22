@@ -1,12 +1,43 @@
 
 --[[-------------------------------------------------------------------------
+Repeatedly used stuff
+---------------------------------------------------------------------------]]
+local DoNothing = function() end -- used a bunch of times
+
+
+--[[-------------------------------------------------------------------------
 Blenders, Modules and Renderers repositories.
+	Key = id (filename)
+	Value = actual module object
 ---------------------------------------------------------------------------]]
 local Modules = {}
 local Blenders = {}
 local Renderers = {}
 
-local DoNothing = function() end -- used a bunch of times
+
+--[[-------------------------------------------------------------------------
+Info - Current stack settings. Can be acquired with
+	heavylight.GetCurrentSettings(). Table of:
+	["stack"] - array of active modules, in order from outermost to innermost
+	["renderer"] - active renderer
+	["blender"] - active blender
+	["poster"] - table of:
+		["size"] - poster size
+		["pass"] - current pass (in Start or End, will always be nil)
+		["total"] - total passes, equal to size suared
+---------------------------------------------------------------------------]]
+local Info = {
+	stack = {},
+
+	poster = {
+		size = 1,
+		total = 1
+	}
+}
+
+
+
+
 
 --[[-------------------------------------------------------------------------
 HeavyLightBase
@@ -20,20 +51,13 @@ debug.getregistry().HeavyLightBase = HeavyLightBase
 --[[-------------------------------------------------------------------------
 Start (hook) - 'Get out of the way'. Called for ALL existing modules when
 	rendering starts.
-param: info
+param: info - see Info at the top of this file
 ---------------------------------------------------------------------------]]
 HeavyLightBase.Start = DoNothing -- by default
 
 --[[-------------------------------------------------------------------------
 End (hook) - HeavyLight finished completely.
-param: info - Table of:
-	["stack"] - array of active modules, in order from outermost to innermost
-	["renderer"] - active renderer
-	["blender"] - active blender
-	["poster"] - table of:
-		["size"] - poster size
-		["pass"] - current pass (in Start or End, will always be nil)
-		["total"] - total passes, equal to size suared
+param: info - see Info at the top of this file
 ---------------------------------------------------------------------------]]
 HeavyLightBase.End = DoNothing -- by default
 
@@ -91,6 +115,13 @@ function HeavyLightBase:IsActive()
 	error("This should be overwritten by child classes!")
 end
 
+
+
+
+
+
+
+
 --[[-------------------------------------------------------------------------
 HeavyLightBlender
 ==================
@@ -101,6 +132,17 @@ local HeavyLightBlender = setmetatable({}, HeavyLightBase)
 HeavyLightBlender.__index = HeavyLightBlender
 debug.getregistry().HeavyLightBlender = HeavyLightBlender
 
+--[[-------------------------------------------------------------------------
+Activate (method) Set this as the active Blender for any upcoming HeavyLight
+	renders. After this, IsActive will be true.
+
+	Throws an error if IsAvailable returns false.
+
+	Note that the only way to become inactive afterwards is when another
+	blender is activated. If IsAvailable becomes false while active,
+	HeavyLight will not allow the user to start a render until a different
+	blender is selected or IsAvailable becomes true again.
+---------------------------------------------------------------------------]]
 
 
 
@@ -174,49 +216,6 @@ end
 --[[-------------------------------------------------------------------------
 GUI
 ---------------------------------------------------------------------------]]
-
---[[ OLD (copied from SuperDOF):
-local PANEL = {}
-
-local HeavyLightWindow = nil
-
-function PANEL:Init()
-	self:SetTitle("HeavyLight")
-	self:SetSize( 600, 220)
-
-	self.ActionButtonsPanel = _G.vgui.Create("DPanel", self)
-
-	self.StartButton = _G.vgui.Create("DButton", self.ActionButtonsPanel)
-	self.StartButton:SetText("Test Button")
-	self.StartButton.DoClick = DoHeavyLightRender
-
-	self.ActionButtonsPanel:Dock(FILL)
-end
-
-PANEL = _G.vgui.RegisterTable(PANEL, "DFrame")
-
-_G.concommand.Add("hl_openwindow", function()
-	if _G.IsValid(HeavyLightWindow) then
-		_G.print "Deleting old window"
-		HeavyLightWindow:Remove()
-	end
-
-	_G.print "Creating new window"
-	HeavyLightWindow = _G.vgui.CreateFromTable(PANEL)
-
-	HeavyLightWindow:AlignBottom(50)
-	HeavyLightWindow:CenterHorizontal()
-	HeavyLightWindow:MakePopup()
-end)
-
-_G.list.Set("PostProcess", "HeavyLight", {
-	icon = "gui/postprocess/superdof.png",
-	category = "#effects_pp",
-	onclick = function() _G.RunConsoleCommand("hl_openwindow") end
-})
-]]
-
--- New, and atm just proof of concept:
 local mainui
 local function GetMainUI()
 	if mainui then return mainui end
@@ -287,23 +286,23 @@ The HeavyLight Library
 local _G = _G
 module("heavylight")
 
-function NewModule()
-	local m = setmetatable({}, HeavyLightModule)
-	Modules[m] = m
-	return m
-end
+-- function NewModule()
+-- 	local m = setmetatable({}, HeavyLightModule)
+-- 	Modules[m] = m
+-- 	return m
+-- end
 
-function NewBlender()
-	local b = setmetatable({}, HeavyLightBlender)
-	Blenders[b] = b
-	return b
-end
+-- function NewBlender()
+-- 	local b = setmetatable({}, HeavyLightBlender)
+-- 	Blenders[b] = b
+-- 	return b
+-- end
 
-function NewRenderer()
-	local r = setmetatable({}, HeavyLightRenderer)
-	Renderers[r] = r
-	return r
-end
+-- function NewRenderer()
+-- 	local r = setmetatable({}, HeavyLightRenderer)
+-- 	Renderers[r] = r
+-- 	return r
+-- end
 
 
 local function DoHeavyLightRender()
