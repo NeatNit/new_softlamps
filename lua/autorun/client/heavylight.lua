@@ -1,11 +1,10 @@
+
 --[[-------------------------------------------------------------------------
-Blenders, Modules and Renderers repositories. These should basically just be
-lists, but for easier adding and removing, they will be [module] = module
+Blenders, Modules and Renderers repositories.
 ---------------------------------------------------------------------------]]
 local Modules = {}
 local Blenders = {}
 local Renderers = {}
-
 
 local DoNothing = function() end -- used a bunch of times
 
@@ -19,58 +18,78 @@ HeavyLightBase.__index = HeavyLightBase
 debug.getregistry().HeavyLightBase = HeavyLightBase
 
 --[[-------------------------------------------------------------------------
-Set/GetName - friendly name / title
----------------------------------------------------------------------------]]
-AccessorFunc(HeavyLightBase, "_name", "Name", FORCE_STRING)
-
---[[-------------------------------------------------------------------------
-Set/GetParent - sets/gets a parent entity (or other object) so the module gets
-	automatically removed when it's found to be invalid. This is optional.
----------------------------------------------------------------------------]]
-function HeavyLightBase:SetParent(p)
-	if not p.IsValid then error("Attempt to set a parent without an IsValid fuction!") end
-	self._parent = p
-end
-function HeavyLightBase:GetParent()
-	return self._parent
-end
-
---[[-------------------------------------------------------------------------
 Start (hook) - 'Get out of the way'. Called for ALL existing modules when
 	rendering starts.
-param: HeavyLightStackStructure
+param: info
 ---------------------------------------------------------------------------]]
 HeavyLightBase.Start = DoNothing -- by default
 
 --[[-------------------------------------------------------------------------
-New (hook) - notification that this is a new scene (view changed or something
-	in the world changed).
-param: HeavyLightStackStructure
+End (hook) - HeavyLight finished completely.
+param: info - Table of:
+	["stack"] - array of active modules, in order from outermost to innermost
+	["renderer"] - active renderer
+	["blender"] - active blender
+	["poster"] - table of:
+		["size"] - poster size
+		["pass"] - current pass (in Start or End, will always be nil)
+		["total"] - total passes, equal to size suared
 ---------------------------------------------------------------------------]]
-HeavyLightBase.New = DoNothing -- by default
---[[ examples:
-
--- a renderer might need to clear the screen before ticking:
-function some_renderer:New(stack)
-	render.Clear(0, 0, 0, 255)
-end
-
--- a module might reset some internal variables or prep stuff:
-function some_module:New(stack)
-	self:GetParent():PrepareForHeavyLightTick()
-end
-]]
-
+HeavyLightBase.End = DoNothing -- by default
 
 --[[-------------------------------------------------------------------------
-Finish (hook) - HeavyLight finished completely.
-param: HeavyLightStackStructure
+Reset (hook) - For Modules and the Renderer, called when they need to prepare
+	for another go after they've finished their last Run - e.g. when using
+	SoftLamps under SuperDoF, SoftLamps will be Reset every time it's done
+	and SuperDoF will be run once.
+
+	For the Blender, it acts similarly with poster being the parent.
 ---------------------------------------------------------------------------]]
-HeavyLightBase.Finish = DoNothing -- by default
+function HeavyLightBase:Reset(info)
+	self:Start(info)
+end
 
+--[[-------------------------------------------------------------------------
+MenuOpened (hook) - Gets called every time the user switches from a different
+	module menu to this module's menu.
+---------------------------------------------------------------------------]]
+HeavyLightBase.MenuOpened = DoNothing
 
+--[[-------------------------------------------------------------------------
+IsAvailable (hook) - Return whether this module is available to be made
+	active. When returning false, you can (and should) provide a second
+	return value, a string explaining to the user why this isn't available.
+---------------------------------------------------------------------------]]
+function HeavyLightBase:IsAvailable()
+	return true
+end
 
+--[[-------------------------------------------------------------------------
+SetAvailable (method) - This overwrites IsAvailable with a function that
+	always returns the values you specify.
+params:
+	(boolean) available - whether the module is available.
+	(optional string) reason - if false, explain (to the user) why this isn't available. This may be a language string.
+---------------------------------------------------------------------------]]
+function HeavyLightBase:SetAvailable(available, reason)
+	if reason then
+		function self:IsAvailable()
+			return available, reason
+		end
+	else
+		function self:IsAvailable()
+			return available
+		end
+	end
+end
 
+--[[-------------------------------------------------------------------------
+IsActive (method) - Get whether this module is active in the current
+	HeavyLight stack. This is implemented per
+---------------------------------------------------------------------------]]
+function HeavyLightBase:IsActive()
+	error("This should be overwritten by child classes!")
+end
 
 --[[-------------------------------------------------------------------------
 HeavyLightBlender
