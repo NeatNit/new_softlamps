@@ -476,7 +476,7 @@ local function AddMainUITo(cpanel)
 	cpanel:AddItem(GetMainUI())
 	local parent = GetMainUI():GetParent()
 
-	local old_Think = type(parent.Think) == "function" and parent.Think or DoNothing
+	local old_Think = parent.Think or DoNothing
 
 	function parent:Think(...)
 		if current_parent ~= self --[[and self:IsVisible() -- Think should guarantee this]] then
@@ -484,19 +484,42 @@ local function AddMainUITo(cpanel)
 			GetMainUI():SetParent(self)
 			GetMainUI():Dock(TOP)
 		end
-		old_Think(self, ...)
+		return old_Think(self, ...)
 	end
 end
 
 -- Add actual options:
 hook.Add("PopulateToolMenu", "heavylight", function()
-	spawnmenu.AddToolMenuOption("heavylight","heavylight_main", "heavylight_main_ui", "Control", "", nil, function(cpanel)
+	spawnmenu.AddToolMenuOption("heavylight","heavylight_settings", "heavylight_main_ui", "Control", "", nil, function(cpanel)
 		AddMainUITo(cpanel)
 	end)
 
-	spawnmenu.AddToolMenuOption("heavylight","heavylight_modules", "heavylight_superdof", "SuperDOF", "", nil, function(cpanel)
-		AddMainUITo(cpanel)
-	end)
+	-- Add modules
+	for name, mod in pairs(Modules) do
+		spawnmenu.AddToolMenuOption("heavylight","heavylight_modules", "heavylight_module_" .. name, mod.PrintName, "", nil, function(cpanel)
+			AddMainUITo(cpanel)
+
+			return mod.BuildCPanel(cpanel)
+		end)
+	end
+
+	-- Add blenders
+	for name, blend in pairs(Blenders) do
+		spawnmenu.AddToolMenuOption("heavylight","heavylight_blenders", "heavylight_blender_" .. name, blend.PrintName, "", nil, function(cpanel)
+			AddMainUITo(cpanel)
+
+			return blend.BuildCPanel(cpanel)
+		end)
+	end
+
+	-- Add renderers
+	for name, rend in pairs(Renderers) do
+		spawnmenu.AddToolMenuOption("heavylight","heavylight_blenders", "heavylight_renderer_" .. name, rend.PrintName, "", nil, function(cpanel)
+			AddMainUITo(cpanel)
+
+			return rend.BuildCPanel(cpanel)
+		end)
+	end
 end)
 
 
