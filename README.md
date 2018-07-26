@@ -91,10 +91,10 @@ Gets which pass this is for this module. Starts at 1, ends at GetPassesCount(). 
 Run your code, do your thing! A renderer is expected to draw to the active render target. A module is expected to change something in the world or in the view.
 
 Arguments:
+- *info* - same as in the hooks Start and End.
 - *view* - [ViewData structure](http://wiki.garrysmod.com/page/Structures/ViewData) with some of the more basic fields already filled in. You can modify this view and any changes will propagate forwards (deeper) into the stack, but not backwards. (Each module's view is basically derived from the previous module's view)
 
     Has one extra key - "weight" - which determines basically the importance of this frame. Default is 1. Depends on the Blender's implementation.
-- *info* - same as in the hooks Start and End.
 - *pass* - equal to `self:GetCurrentPass()`.
 - *outof* - equal to `self:GetPassesCount()`.
 

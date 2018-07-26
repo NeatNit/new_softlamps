@@ -240,6 +240,7 @@ Run (hook) - Run your code, do your thing! A renderer is expected to draw to
 	world or in the view.
 
 Arguments:
+	info - see top of this file
 	view - ViewData structure with some of the more basic fields already
 		filled in. You can modify this view and any changes will propagate
 		forwards (deeper) into the stack, but not backwards. (Each module's
@@ -248,7 +249,6 @@ Arguments:
 		Has one extra key - "weight" - which determines basically the
 		weight of this frame. Default is 1. Depends on the Blender's
 		implementation.
-	info - see top of this file
 	pass - equal to self:GetCurrentPass().
 	outof - equal to self:GetPassesCount().
 
@@ -490,7 +490,7 @@ end
 
 -- Add actual options:
 hook.Add("PopulateToolMenu", "heavylight", function()
-	spawnmenu.AddToolMenuOption("heavylight","heavylight_settings", "heavylight_main_ui", "Control", "", nil, function(cpanel)
+	spawnmenu.AddToolMenuOption("heavylight","heavylight_main", "heavylight_settings", "Control", "", nil, function(cpanel)
 		AddMainUITo(cpanel)
 	end)
 
@@ -514,7 +514,7 @@ hook.Add("PopulateToolMenu", "heavylight", function()
 
 	-- Add renderers
 	for name, rend in pairs(Renderers) do
-		spawnmenu.AddToolMenuOption("heavylight","heavylight_blenders", "heavylight_renderer_" .. name, rend.PrintName, "", nil, function(cpanel)
+		spawnmenu.AddToolMenuOption("heavylight","heavylight_renderers", "heavylight_renderer_" .. name, rend.PrintName, "", nil, function(cpanel)
 			AddMainUITo(cpanel)
 
 			return rend.BuildCPanel(cpanel)
