@@ -71,9 +71,7 @@ Reset (hook) - For Modules and the Renderer, called when they need to prepare
 
 	For the Blender, it acts similarly with poster being the parent.
 ---------------------------------------------------------------------------]]
-function HeavyLightBase:Reset(info)
-	self:Start(info)
-end
+HeavyLightBase.Reset = DoNothing
 
 --[[-------------------------------------------------------------------------
 MenuOpened (hook) - Gets called every time the user switches from a different
@@ -534,57 +532,60 @@ The HeavyLight Library
 local _G = _G
 module("heavylight")
 
--- function NewModule()
--- 	local m = setmetatable({}, HeavyLightModule)
--- 	Modules[m] = m
--- 	return m
--- end
+--[[-------------------------------------------------------------------------
+Get Module/RendererBlender
+Get by name or get the active ones
+---------------------------------------------------------------------------]]
+function GetModule(name)
+	-- Get module by its position in the stack:
+	if isnumber(name) then return Info.modules[name] end
 
--- function NewBlender()
--- 	local b = setmetatable({}, HeavyLightBlender)
--- 	Blenders[b] = b
--- 	return b
--- end
-
--- function NewRenderer()
--- 	local r = setmetatable({}, HeavyLightRenderer)
--- 	Renderers[r] = r
--- 	return r
--- end
-
-
-local function DoHeavyLightRender()
-	local a = true
-	hook.Add("RenderScene", "HeavyLight", function()
-		if a then a = false return end
-
-		local lamp = ents.FindByClass("hl_softlamp")[1]
-		hook.Remove("RenderScene", "HeavyLight")
-
-		mat_copy:SetTexture("$basetexture", tex_scrfx)
-		local i = 0
-		while lamp:NextPT() do
-			i = i + 1
-			--render.Clear(255, 255, 255)
-			render.RenderView()
-			render.UpdateScreenEffectTexture()
-
-			render.PushRenderTarget(tex_blend)
-				mat_copy:SetFloat("$alpha", 1 / i)
-				render.SetMaterial(mat_copy)
-				render.DrawScreenQuad()
-			render.PopRenderTarget()
-		end
-
-		mat_copy:SetTexture("$basetexture", tex_blend)
-		mat_copy:SetFloat("$alpha", 1)
-		render.SetMaterial(mat_copy)
-		render.DrawScreenQuad()
-
-		return true
-	end)
-
-	RunConsoleCommand("poster", 1)
+	-- Get module by name:
+	return Modules[name]
 end
 
+function GetRenderer(name)
+	-- Call without argument to get active renderer:
+	if not name then return Info.renderer end
+
+	-- Get renderer by name:
+	return Renderers[name]
+end
+
+function GetBlender(name)
+	-- Call without argument to get active blender:
+	if not name then return Info.blender end
+
+	-- Get blender by name:
+	return Blenders[name]
+end
+
+--[[-------------------------------------------------------------------------
+heavylight.GetCurrentSettings
+	Gets all of Info - not allowed to be modified whatsoever!
+	I would do table.Copy but I think it's better to just trust the users...
+	And if someone finds out they have to hack it to make something work,
+	well, welcome to gmod.
+---------------------------------------------------------------------------]]
+function GetCurrentSettings()
+	return Info
+end
+
+--[[-------------------------------------------------------------------------
+Start
+	Begin the HeavyLight capture process!
+	Since everything needs to be set up in advance, this function takes no
+	arguments.
+---------------------------------------------------------------------------]]
+function Start(poster_size, poster_split)
+	hook.Add("RenderScene", "HeavyLight", function()
+		--- ?
+	end)
+
+	if poster_split then
+		RunConsoleCommand("poster", poster_size, 1)
+	else
+		RunConsoleCommand("poster", poster_size)
+	end
+end
 

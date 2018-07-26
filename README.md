@@ -40,7 +40,7 @@ For Modules and the Renderer, called when they need to prepare for another go af
 
 For the Blender, it acts similarly when one part of the poster
 
-By default, this will just call Start.
+By default, this will do nothing.
 
 Argument: same as Start.
 
@@ -148,10 +148,10 @@ Set this as the active Blender for any upcoming HeavyLight renders. After this, 
 
 Note that the only way to become inactive afterwards is when another blender is activated. If IsAvailable becomes `false` while active, HeavyLight will not allow the user to start a render until a different blender is selected or IsAvailable becomes true again.
 
-### Hook: PreRender(info)
+### Hook: PreRender(info, view)
 Optional. Called just before the renderer runs. You may want to render.PushRenderTarget something.
 
-### Hook: PostRender(info)
+### Hook: PostRender(info, view)
 Required. Called just after the renderer runs.
 
 You should process the rendered image and save it in some way, because if it gets overwritten in a moment, you didn't accomplish anything.
@@ -161,9 +161,9 @@ If you pushed a render target in PreRender, you should pop it here.
 ### Hook: Preview(info)
 Required. Called after PostRender when we want to show a preview on the screen. Not necessarily called every time!
 
-Draw something to th screen to show the user progress. Draw progress bars somewhere of the screen - if you don't need custom progress bars (which 99% of the time, you really don't), you can call the heavylight library's function to draw them for you.
+Draw something to the screen to show the user progress. Draw progress bars somewhere of the screen - if you don't need custom progress bars (which 99% of the time, you really don't), you can call the heavylight library's function to draw them for you.
 
-### Hook: Finalize
+### Hook: Finalize(info)
 Called after the last PostRender, and should draw on the screen the final image, the blend of all
 
 
