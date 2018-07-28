@@ -644,23 +644,27 @@ Start
 	arguments.
 ---------------------------------------------------------------------------]]
 function Start()
-	local poster_size = Info.Poster.Size
-	local hooks_left = Info.Poster.Total
+	_G.timer.Simple(0, function()
+		local poster_size = Info.Poster.Size
+		local hooks_left = Info.Poster.Total
 
-	_G.hook.Add("RenderScene", "HeavyLight", function()
-		hooks_left = hooks_left - 1
-		if hooks_left <= 0 then
-			_G.hook.Remove("RenderScene", "HeavyLight")
+		local skip = true
+		_G.hook.Add("RenderScene", "HeavyLight", function()
+			if skip then skip = false return end
+			hooks_left = hooks_left - 1
+			if hooks_left <= 0 then
+				_G.hook.Remove("RenderScene", "HeavyLight")
+			end
+
+			GetRenderer():Run(Info, { origin = _G.Vector(0, 0, 0) })
+			return true
+		end)
+
+		if Info.Poster.Split then
+			_G.RunConsoleCommand("poster", poster_size, 1)
+		else
+			_G.RunConsoleCommand("poster", poster_size)
 		end
-
-		GetRenderer():Run()
-		return true
 	end)
-
-	if Info.Poster.Split then
-		_G.RunConsoleCommand("poster", poster_size, 1)
-	else
-		_G.RunConsoleCommand("poster", poster_size)
-	end
 end
 
