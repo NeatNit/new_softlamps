@@ -18,15 +18,18 @@ local Blenders = {}
 --[[-------------------------------------------------------------------------
 Info - Current stack settings. Can be acquired with
 	heavylight.GetCurrentSettings(). Table of:
-	["modules"] - array of active modules, in order from outermost to innermost
+	["Modules"] - array of active modules, in order from outermost to innermost
 		also module name keys which indicate that module's index in the stack,
 			nil if it's not in the stack
-	["renderer"] - active renderer
-	["blender"] - active blender
-	["poster"] - table of:
-		["size"] - poster size
-		["pass"] - current pass (in Start or End, will always be nil)
-		["total"] - total passes, equal to size suared
+	["Renderer"] - active renderer
+	["Blender"] - active blender
+	["Poster"] - table of:
+		["Size"] - poster size
+		["Split"] - (boolean) whether the poster should be saved as separate
+			screen-sized images instead of being stitched into one large
+			image
+		["Pass"] - current pass (in Start or End, will always be nil)
+		["Total"] - total passes, equal to size suared
 ---------------------------------------------------------------------------]]
 local Info = {
 	modules = {},
@@ -161,7 +164,7 @@ end
 IsActive
 ---------------------------------------------------------------------------]]
 function HeavyLightBlender:IsActive()
-	return heavylight.GetCurrentSettings().blender == self
+	return heavylight.GetCurrentSettings().Blender == self
 end
 
 --[[-------------------------------------------------------------------------
@@ -305,7 +308,7 @@ end
 IsActive
 ---------------------------------------------------------------------------]]
 function HeavyLightRenderer:IsActive()
-	return heavylight.GetCurrentSettings().renderer == self
+	return heavylight.GetCurrentSettings().Renderer == self
 end
 
 
@@ -538,7 +541,7 @@ Get by name or get the active ones
 ---------------------------------------------------------------------------]]
 function GetModule(name)
 	-- Get module by its position in the stack:
-	if isnumber(name) then return Info.modules[name] end
+	if isnumber(name) then return Info.Modules[name] end
 
 	-- Get module by name:
 	return Modules[name]
@@ -546,7 +549,7 @@ end
 
 function GetRenderer(name)
 	-- Call without argument to get active renderer:
-	if not name then return Info.renderer end
+	if not name then return Info.Renderer end
 
 	-- Get renderer by name:
 	return Renderers[name]
@@ -554,10 +557,19 @@ end
 
 function GetBlender(name)
 	-- Call without argument to get active blender:
-	if not name then return Info.blender end
+	if not name then return Info.Blender end
 
 	-- Get blender by name:
 	return Blenders[name]
+end
+
+--[[-------------------------------------------------------------------------
+Get/SetPoster
+---------------------------------------------------------------------------]]
+function SetPoster(size, split)
+	Info.Poster.Total = size * size
+	Info.Poster.Size = size
+	Info.Poster.Split = split and true or false
 end
 
 --[[-------------------------------------------------------------------------
