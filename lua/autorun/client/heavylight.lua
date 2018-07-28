@@ -30,16 +30,10 @@ Info - Current stack settings. Can be acquired with
 			image
 		["Pass"] - current pass (in Start or End, will always be nil)
 		["Total"] - total passes, equal to size suared
+
+	This variable is defined further down in the file, it's local to the
+	library only.
 ---------------------------------------------------------------------------]]
-local Info = {
-	modules = {},
-
-	poster = {
-		size = 1,
-		total = 1
-	}
-}
-
 
 
 
@@ -146,6 +140,9 @@ hooks.
 local HeavyLightBlender = setmetatable({}, HeavyLightBase)
 HeavyLightBlender.__index = HeavyLightBlender
 debug.getregistry().HeavyLightBlender = HeavyLightBlender
+
+local IS_BLENDER = {} -- unique private key
+HeavyLightBlender[IS_BLENDER] = true
 
 --[[-------------------------------------------------------------------------
 Activate (method) Set this as the active Blender for any upcoming HeavyLight
@@ -291,6 +288,9 @@ local HeavyLightRenderer = setmetatable({}, HeavyLightIterativeBase)
 HeavyLightRenderer.__index = HeavyLightRenderer
 debug.getregistry().HeavyLightRenderer = HeavyLightRenderer
 
+local IS_RENDERER = {} -- unique private key
+HeavyLightRenderer[IS_RENDERER] = true
+
 --[[-------------------------------------------------------------------------
 Activate - Set this as the active Renderer for any upcoming HeavyLight
 	renders. After this, IsActive will be true.
@@ -328,6 +328,9 @@ Module that can be part of the stack, like Soft Lamps or SuperDOF. They can
 local HeavyLightModule = setmetatable({}, HeavyLightIterativeBase)
 HeavyLightModule.__index = HeavyLightModule
 debug.getregistry().HeavyLightModule = HeavyLightModule
+
+local IS_MODULE = {} -- unique private key
+HeavyLightModule[IS_MODULE] = true
 
 --[[-------------------------------------------------------------------------
 Activate - Insert the module into the stack. After this, IsActive will be
@@ -443,21 +446,6 @@ end
 --[[-------------------------------------------------------------------------
 GUI
 ---------------------------------------------------------------------------]]
-local mainui
-local function GetMainUI()
-	if mainui then return mainui end
-
-	print "creating mainui"
-
-	mainui = vgui.Create("DLabel")
-	mainui:SetText("Hello,\nHeavyLight\nWorld!")
-	mainui:SetColor(Color(255, 255, 0))
-	mainui:SizeToContents()
-
-	return mainui
-end
-
-
 
 -- Create tool tab and categories
 -- (these could be together in one hook but I figured it's nice to have structure)
@@ -471,6 +459,24 @@ hook.Add("AddToolMenuCategories","heavylight",function()
 	spawnmenu.AddToolCategory("heavylight", "heavylight_renderers", "Renderers")
 	spawnmenu.AddToolCategory("heavylight", "heavylight_blenders", "Blenders")
 end)
+
+
+-- Main UI
+
+local mainui
+local function GetMainUI()
+	if mainui then return mainui end
+
+	mainui = vgui.Create("DPanel")
+
+	local btn = vgui.Create("DButton", mainui)
+	btn:SetText("Start")
+	btn:Dock(TOP)
+
+	btn.DoClick = heavylight.Start
+
+	return mainui
+end
 
 local current_parent = nil
 local function AddMainUITo(cpanel)
@@ -535,13 +541,35 @@ The HeavyLight Library
 local _G = _G
 module("heavylight")
 
+-- Info - see top of file
+local Info = {
+	Modules = {},
+
+	Poster = {
+		Size = 1,
+		Total = 1,
+		Split = false
+	}
+}
+
 --[[-------------------------------------------------------------------------
-Get Module/RendererBlender
-Get by name or get the active ones
+heavylight.GetCurrentSettings
+	Gets all of Info - not allowed to be modified whatsoever!
+	I would do table.Copy but I think it's better to just trust the users...
+	And if someone finds out they have to hack it to make something work,
+	well, welcome to gmod.
+---------------------------------------------------------------------------]]
+function GetCurrentSettings()
+	return Info
+end
+
+--[[-------------------------------------------------------------------------
+Get Module/Renderer/Blender
+	Get by name or get the active ones
 ---------------------------------------------------------------------------]]
 function GetModule(name)
 	-- Get module by its position in the stack:
-	if isnumber(name) then return Info.Modules[name] end
+	if _G.isnumber(name) then return Info.Modules[name] end
 
 	-- Get module by name:
 	return Modules[name]
@@ -564,7 +592,40 @@ function GetBlender(name)
 end
 
 --[[-------------------------------------------------------------------------
+SetActiveRenderer/Blender
+---------------------------------------------------------------------------]]
+function SetActiveRenderer(rend)
+	if not rend then
+		Info.Renderer = nil
+	elseif _G.isstring(rend) then
+		Info.Renderer = Renderers[rend]	-- even if it's nil
+	elseif rend[IS_RENDERER] then
+		Info.Renderer = rend
+	else
+		_G.error("Not a Renderer!")
+	end
+
+	-- TO DO: call Settings Changed hook?
+end
+
+function SetActiveBlender(blend)
+	if not blend then
+		Info.Blender = nil
+	elseif _G.isstring(blend) then
+		Info.Blender = Blenders[blend]	-- even if it's nil
+	elseif blend[IS_BLENDER] then
+		Info.Blender = blend
+	else
+		_G.error("Not a Blender!")
+	end
+
+	-- TO DO: call Settings Changed hook?
+end
+
+
+--[[-------------------------------------------------------------------------
 Get/SetPoster
+	Set the poster settings
 ---------------------------------------------------------------------------]]
 function SetPoster(size, split)
 	Info.Poster.Total = size * size
@@ -572,15 +633,8 @@ function SetPoster(size, split)
 	Info.Poster.Split = split and true or false
 end
 
---[[-------------------------------------------------------------------------
-heavylight.GetCurrentSettings
-	Gets all of Info - not allowed to be modified whatsoever!
-	I would do table.Copy but I think it's better to just trust the users...
-	And if someone finds out they have to hack it to make something work,
-	well, welcome to gmod.
----------------------------------------------------------------------------]]
-function GetCurrentSettings()
-	return Info
+function GetPosterSettings()
+	return Info.Poster
 end
 
 --[[-------------------------------------------------------------------------
@@ -590,14 +644,23 @@ Start
 	arguments.
 ---------------------------------------------------------------------------]]
 function Start()
-	hook.Add("RenderScene", "HeavyLight", function()
-		--- ?
+	local poster_size = Info.Poster.Size
+	local hooks_left = Info.Poster.Total
+
+	_G.hook.Add("RenderScene", "HeavyLight", function()
+		hooks_left = hooks_left - 1
+		if hooks_left <= 0 then
+			_G.hook.Remove("RenderScene", "HeavyLight")
+		end
+
+		GetRenderer():Run()
+		return true
 	end)
 
-	if poster_split then
-		RunConsoleCommand("poster", poster_size, 1)
+	if Info.Poster.Split then
+		_G.RunConsoleCommand("poster", poster_size, 1)
 	else
-		RunConsoleCommand("poster", poster_size)
+		_G.RunConsoleCommand("poster", poster_size)
 	end
 end
 
