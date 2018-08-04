@@ -9,5 +9,6 @@ function RENDERER.BuildCPanel(cpanel)
 end
 
 function RENDERER:Run(data, view)
+	view.origin = Vector(0, 0, 0)
 	render.RenderView(view)
 end

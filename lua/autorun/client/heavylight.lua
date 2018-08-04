@@ -467,13 +467,35 @@ local mainui
 local function GetMainUI()
 	if mainui then return mainui end
 
-	mainui = vgui.Create("DPanel")
+	mainui = vgui.Create("Panel")
+
+	local poster_lbl = vgui.Create("DLabel", mainui)
+	poster_lbl:SetText("poster:")
+	poster_lbl:Dock(TOP)
+
+	local poster = vgui.Create("DNumberWang", mainui)
+	poster:SetDecimals(0)
+	poster:SetMin(1)
+	function poster:OnValueChanged(newval)
+		heavylight.SetPoster(newval, heavylight.GetPosterSettings().Split)
+	end
+
+	poster:Dock(TOP)
+	poster:SetValue(1)
 
 	local btn = vgui.Create("DButton", mainui)
 	btn:SetText("Start")
 	btn:Dock(TOP)
 
 	btn.DoClick = heavylight.Start
+
+
+	mainui:InvalidateLayout(true) -- if someone could explain to me why this has to be called with true before SizeToChildren, that would be great
+	mainui:SizeToChildren(true, true)
+
+
+	-- for debug:
+	MAINUI = mainui
 
 	return mainui
 end
@@ -656,7 +678,7 @@ function Start()
 				_G.hook.Remove("RenderScene", "HeavyLight")
 			end
 
-			GetRenderer():Run(Info, { origin = _G.Vector(0, 0, 0) })
+			GetRenderer():Run(Info, {})
 			return true
 		end)
 
